@@ -1,0 +1,26 @@
+{
+    "name": "cloud-finance/e-fatture-ws-client",
+    "description": "Client per l'invio di fatture elettroniche tramite la piattaforma eFATTURE",
+    "keywords": [ "fattura", "elettronica" ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fabio Soggia",
+            "email": "f.soggia@cloudfinance.it"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "CloudFinance\\EFattureWsClient\\": ["src"]
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}
