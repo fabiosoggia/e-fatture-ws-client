@@ -13,6 +13,8 @@ class SkeletonClassTest extends \PHPUnit_Framework_TestCase
     public function testEchoPhrase()
     {
         $builder = new InvoiceBuilder();
-        $builder->validate();
+        $builder->set("/FatturaElettronica/FatturaElettronicaHeader[1]/DatiTrasmissione", "Ciao");
+        $builder->set("/FatturaElettronica/FatturaElettronicaHeader[2]/DatiTrasmissione", "Fabio");
+        echo $builder->saveXML();
     }
 }

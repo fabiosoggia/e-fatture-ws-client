@@ -4,42 +4,78 @@ namespace CloudFinance\EFattureWsClient;
 
 require_once __DIR__ . "/../vendor/autoload.php";
 
+use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoiceParameter;
 use CloudFinance\EFattureWsClient\Iso3166;
 
+define("FATTURA_PA_1_2_NAMESPACE", "http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2");
+
 class InvoiceBuilder
 {
-    private $domDocument;
-    private $domXPath;
-    private $header;
-    private $body;
+    protected $domDocument;
+    protected $domXPath;
+    protected $rootNode;
+    protected $fatturaPaNamespaceUri;
+    protected $fatturaPaNamespacePrefix;
 
-    public function __construct() {
-        $template = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica versione="FPA12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-                xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-                <FatturaElettronicaHeader></FatturaElettronicaHeader>
-                <FatturaElettronicaBody></FatturaElettronicaBody>
-            </p:FatturaElettronica>';
+    public function __construct(sring $xml = null) {
+        if (empty($xml)) {
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>
+                <p:FatturaElettronica versione="FPA12"
+                    xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                    xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+                </p:FatturaElettronica>';
+        }
 
-        $this->domDocument = \DOMDocument::loadXML($template);
+        $this->domDocument = \DOMDocument::loadXML($xml);
+        $this->rootNode = $this->domDocument->documentElement;
+
         $this->domXPath = new \DOMXPath($this->domDocument);
 
-        // $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/fabio/luigi", "Hello");
-        // $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/fabio/p:luigi", "World");
+        $namespaces = [];
+        $hasDefaultNamespace = false;
+        $hasFatturaPaNamespacePrefix = false;
+        foreach ($this->domXPath->query('namespace::*') as $node) {
+            $namespaceUri = $node->nodeValue;
+            $namespacePrefix = $this->domDocument->lookupPrefix($namespaceUri);
+            $namespaces[] = $namespaceUri;
 
-        // $this->header = $this->domXPath->query('/p:FatturaElettronica/FatturaElettronicaHeader')->item(0);
-        // $this->body = $this->domXPath->query('/p:FatturaElettronica/FatturaElettronicaBody')->item(0);
-        // $this->header->nodeValue = $this->body->nodeValue = "fabio";
-        // echo $this->domDocument->saveXML();
-        // die();
+            $hasDefaultNamespace = $hasDefaultNamespace || $this->domDocument->isDefaultNamespace($namespaceUri);
+            $hasFatturaPaNamespacePrefix = $hasFatturaPaNamespacePrefix
+                || (($namespaceUri === FATTURA_PA_1_2_NAMESPACE) && (!empty($namespacePrefix)));
+        }
+
+        if (!$hasDefaultNamespace) {
+            $this->rootNode->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', FATTURA_PA_1_2_NAMESPACE);
+            // $this->domXPath->registerNamespace("", FATTURA_PA_1_2_NAMESPACE);
+        }
+
+        $namespacePrefix = "";
+        if (!$hasFatturaPaNamespacePrefix) {
+            $namespacePrefixExists = false;
+            do {
+                $namespacePrefix .= "p";
+                $namespacePrefixExists = !empty($this->domDocument->lookupNamespaceUri($namespacePrefix));
+            } while ($namespacePrefixExists);
+            $this->rootNode->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:' . $namespacePrefix, FATTURA_PA_1_2_NAMESPACE);
+        } else {
+            $namespacePrefix = $this->domDocument->lookupPrefix(FATTURA_PA_1_2_NAMESPACE);
+        }
+
+        $this->fatturaPaNamespaceUri = FATTURA_PA_1_2_NAMESPACE;
+        $this->fatturaPaNamespacePrefix = $namespacePrefix;
+
+        $this->domDocument = \DOMDocument::loadXML($this->domDocument->saveXML());
+        $this->rootNode = $this->domDocument->documentElement;
+        $this->domXPath = new \DOMXPath($this->domDocument);
     }
 
     public function validate()
     {
+        $this->domDocument->normalizeDocument();
         $internalErrorPreviousValue = libxml_use_internal_errors(true);
         $schema = __DIR__ . "/../resources/Schema_del_file_xml_FatturaPA_versione_1.2.xsd";
         if ($this->domDocument->schemaValidate($schema)) {
@@ -52,145 +88,82 @@ class InvoiceBuilder
         throw new InvalidInvoice($error->message, $error->code);
     }
 
-    public function set(string $path, $value)
+    public function set(string $xpath, $value)
     {
-        $nodes = $this->domXPath->query($path);
-        if (\count($nodes) === 1) {
-            $nodes->item(0)->nodeValue = $value;
-            return;
-        }
+        $parentNode = $this->rootNode;
+        $currentPath = $this->rootNode->getNodePath();
 
-        $parentNode = $this->domXPath->query('/p:FatturaElettronica')->item(0);
-        $currentPath = '/p:FatturaElettronica';
-        $tokens = \explode('/', $path);
+        $namespacePrefix = $this->fatturaPaNamespacePrefix;
+        $namespaceUri = $this->fatturaPaNamespaceUri;
 
-        foreach ($tokens as $token) {
-            if (empty($token)) {
+        $xpath = trim($xpath, "/");
+        $tags = \explode('/', $xpath);
+
+        $tagRegex = '/([a-zA-Z0-9]+)(\[(\d*)\])?/i';
+
+        foreach ($tags as $token) {
+            $res = preg_match($tagRegex, $token, $matches);
+            if ($res === false) {
+                throw \Exception("Invalid regex.");
+            }
+
+            if ($res === 0) {
+                $error = sprintf("Could not parse path '%s'.", $token);
+                throw new EFattureWsClientException($error);
+            }
+
+            $tag = $matches[1];
+            $index = count($matches) === 4 ? intval($matches[3]) : 1;
+            $index = \max($index, 1);
+
+            if (empty($tag)) {
                 continue;
             }
 
-            if ($token === 'p:FatturaElettronica') {
+            if ($tag === 'FatturaElettronica') {
                 continue;
             }
 
-            $ts = \explode(":", $token);
-            $tsExt = \count($ts) === 2;
-            $namespace = $tsExt ? $ts[0] : "";
-            $tag = $tsExt ? $ts[1] : $ts[0];
+            $currentPath .= "/$namespacePrefix:$tag";
+            $nodes = $this->domXPath->query($currentPath);
+            $nodesCount = \count($nodes);
 
-            $currentPath .= "/" . $token;
-            $nodes = $this->domXPath->query($path);
-            if (\count($nodes) > 0) {
-                $node = $nodes->item(0);
+            if ($nodesCount > $index - 1) {
+                $node = $nodes->item($index - 1);
             } else {
-                $node = new \DOMElement($tag, "", $namespace);
-                if ($tsExt) {
-                    $node = $this->domDocument->createElementNS($this->domDocument->lookupNamespaceUri($namespace), $token);
-                } else {
-                    $node = $this->domDocument->createElement($token);
+                for ($n = $nodesCount; $n <= $index; $n++) {
+                    $node = $this->domDocument->createElementNS($namespaceUri, $tag);
+                    $parentNode->appendChild($node);
                 }
-                $parentNode->appendChild($node);
             }
 
+            $currentPath = $node->getNodePath();
             $parentNode = $node;
         }
 
         $parentNode->nodeValue = $value;
     }
 
-    private function validateCountryCodeParam(string $value, string $paramName)
+    public function has(string $xpath)
     {
-        if (!Iso3166::isValidCountryCode($value)) {
-            throw new InvalidInvoiceParameter("Parameter '$paramName' is not a valid ISO 3166-1 alpha-2 country code.");
+        $nodes = $this->domXPath->query($xpath);
+        if (\count($nodes) > 0) {
+            return true;
         }
+        return false;
     }
 
-    private function validateStringParam(string $value, string $paramName, int $maxLength, bool $empty)
+    public function get(string $xpath, $default = null)
     {
-        if (!$empty) {
-            if (empty($value)) {
-                throw new InvalidInvoiceParameter("Parameter '$paramName' can't be empty.");
-            }
+        $nodes = $this->domXPath->query($xpath);
+        if (\count($nodes) !== 1) {
+            return $default;
         }
-
-        if (\strlen($value) > $maxLength) {
-            throw new InvalidInvoiceParameter("Parameter '$paramName' can't longer than $maxLength characters.");
-        }
+        return $nodes->item(0)->nodeValue;
     }
 
-    private function validateEnumParam(string $value, string $paramName, array $enum)
+    public function saveXML()
     {
-        if (!in_array($value, $enum)) {
-            $error = "Parameter '$paramName' value is not valid.";
-            if (count($enum) < 5) {
-                $error = \sprintf("Parameter '%s' value must be one of [%s].", $paramName, \implode(", ", $enum));
-            }
-            throw new InvalidInvoiceParameter($error);
-        }
+        return $this->domDocument->saveXML();
     }
-
-    private function validateEmailParam(string $value, string $paramName, bool $empty)
-    {
-        if (empty($value)) {
-            if (!$empty) {
-                throw new InvalidInvoiceParameter("Parameter '$paramName' can't be empty.");
-            } else {
-                return;
-            }
-        }
-
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            throw new InvalidInvoiceParameter("Parameter '$paramName' is not a valid email.");
-        }
-    }
-
-    public function setIdTrasmittente(string $idPaese, string $idCodice)
-    {
-        $idPaese = \strtoupper($idPaese);
-        $this->validateCountryCodeParam($idPaese, "idPaese");
-        $this->validateStringParam($idCodice, "idCodice", 28, false);
-
-        $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", $idPaese);
-        $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", $idCodice);
-    }
-
-    public function setProgressivoInvio(string $progressivoInvio)
-    {
-        $this->validateStringParam($progressivoInvio, "progressivoInvio", 10, false);
-
-        $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio", $progressivoInvio);
-    }
-
-    public function setDestinatario(string $formatoTrasmissione, string $codiceDestinatario, string $pecDestinatario)
-    {
-        $enum = [
-            "FPA12",
-            "FPR12"
-        ];
-        $formatoTrasmissione = \strtoupper($formatoTrasmissione);
-        $this->validateEnumParam($formatoTrasmissione, "formatoTrasmissione", $enum);
-
-        if ($formatoTrasmissione === "FPA12") {
-            $this->validateStringParam($codiceDestinatario, "codiceDestinatario", 6, false);
-        } else {
-            $this->validateStringParam($codiceDestinatario, "codiceDestinatario", 7, false);
-        }
-
-        if ($codiceDestinatario === "0000000") {
-            $this->validateEmailParam($pecDestinatario, "pecDestinatario", false);
-        }
-
-        $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formatoTrasmissione);
-        $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario", $codiceDestinatario);
-
-        if ($codiceDestinatario === "0000000") {
-            $this->set("/p:FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario", $pecDestinatario);
-        }
-    }
-
-    public function setContattiTrasmittente(string $telefono, string $email)
-    {
-
-    }
-
 }
