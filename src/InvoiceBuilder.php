@@ -296,6 +296,7 @@ class InvoiceBuilder
     /**
      * Restituisce l'XML della fattura come stringa.
      *
+     * @param boolean $prettyPrint
      * @return string
      */
     public function saveXML($prettyPrint = false)
