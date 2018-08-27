@@ -67,6 +67,14 @@ class InvoiceBuilder
 
     private function normalizeXml(string $xml)
     {
+        // Espandi nodi vuoti
+        try {
+            $domDocument = new \DOMDocument();
+            $domDocument->loadXML($xml);
+            $xml = $domDocument->saveXML(null, LIBXML_NOEMPTYTAG);
+        } catch (\Exception $ex) {
+        }
+
         // Mancano alcuni caratteri, vedere:
         // https://www.w3.org/TR/xml/#NT-Name
         $nameChar = 'a-z_\xC0-\xD6\xD8-\xF6\-\.0-9\xB7';
@@ -83,7 +91,7 @@ class InvoiceBuilder
         $replacement = '<' . $this->fatturaPaNamespacePrefix . 'FatturaElettronica versione="FPA12"
             xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+            xmlns:' . $this->fatturaPaNamespacePrefix . '="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
             xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">';
         $xml = preg_replace($pattern, $replacement, $xml);
 
