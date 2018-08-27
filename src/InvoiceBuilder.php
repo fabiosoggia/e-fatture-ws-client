@@ -30,12 +30,19 @@ class InvoiceBuilder
      *
      * @param string $xml
      */
-    public function __construct(string $xml = null) {
+    public function __construct(string $xml = null, $normalize = false) {
         if (empty($xml)) {
-            $xml = '<?xml version="1.0" encoding="UTF-8"?><FatturaElettronica></FatturaElettronica>';
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>
+                <p:FatturaElettronica versione="FPA12"
+                xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+                xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" />';;
         }
 
-        $xml = $this->normalizeXml($xml);
+        if ($normalize) {
+            $xml = $this->normalizeXml($xml);
+        }
 
         $this->domDocument = new \DOMDocument();
         try {
@@ -44,9 +51,6 @@ class InvoiceBuilder
             $error = sprintf("Invalid invoice XML: %s.", $ex->getMessage());
             throw new InvalidInvoice($error, $ex->getCode());
         }
-        // $this->domDocument->normalizeDocument();
-        // $this->domDocument->preserveWhiteSpace = false;
-        // $this->domDocument->formatOutput = true;
 
         $this->rootNode = $this->domDocument->documentElement;
         $this->domXPath = new \DOMXPath($this->domDocument);
@@ -60,8 +64,10 @@ class InvoiceBuilder
         if ($this->rootNode->localName !== "FatturaElettronica") {
             throw new InvalidInvoice("Invalid invoice XML: root node is not FatturaElettronica.");
         }
-        if (($this->rootNode->prefix . ":") !== $this->fatturaPaNamespacePrefix) {
-            throw new InvalidInvoice("Invalid invoice XML: invalid namespace prefix for FatturaElettronica.");
+        if ($normalize) {
+            if (($this->rootNode->prefix . ":") !== $this->fatturaPaNamespacePrefix) {
+                throw new InvalidInvoice("Invalid invoice XML: invalid namespace prefix for FatturaElettronica.");
+            }
         }
     }
 
@@ -91,7 +97,7 @@ class InvoiceBuilder
         $replacement = '<' . $this->fatturaPaNamespacePrefix . 'FatturaElettronica versione="FPA12"
             xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:' . $this->fatturaPaNamespacePrefix . '="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
+            xmlns:' . \trim($this->fatturaPaNamespacePrefix, ':') . '="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
             xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">';
         $xml = preg_replace($pattern, $replacement, $xml);
 
@@ -153,7 +159,7 @@ class InvoiceBuilder
     private function retrieveNode(string $path, $createIfNotExists = false)
     {
         $parentNode = $this->rootNode;
-        $currentPath = "/" . $this->fatturaPaNamespacePrefix . "FatturaElettronica";
+        $currentPath = "/*";
 
         $path = \trim($path, "/");
         $tags = \explode('/', $path);
@@ -257,13 +263,13 @@ class InvoiceBuilder
     public function get(string $path, string $default = null)
     {
         $path = $this->normalizePath($path);
-        $path = str_replace("FatturaElettronica/", "/" . $this->fatturaPaNamespacePrefix . "FatturaElettronica/", $path);
+        $path = str_replace("FatturaElettronica/", "/*/", $path);
         $nodes = $this->domXPath->query($path);
         if (\count($nodes) === 0) {
             return $default;
         }
         $node = $nodes->item(0);
-        $value = $node->nodeValue;
+        $value = \trim($node->nodeValue);
         if (empty($value)) {
             return $default;
         }
