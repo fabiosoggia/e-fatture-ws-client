@@ -79,4 +79,28 @@ class Client
 		$messageDigest = \hash_hmac("sha256", json_encode($payload), $apiKey);
 		return $messageDigest;
     }
+
+    public function sendInvoice(InvoiceBuilder $invoice)
+    {
+        // Compila campi "obbligatori"
+        $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");
+        $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", \str_repeat("0", 28));
+        $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio", \str_repeat("0", 10));
+
+        // Valida contenuto della fattura
+        $invoice->validate();
+
+        // Effettua la richiesta
+        $xml = $invoice->saveXML();
+        $payload = [ "invoice" => $xml ];
+        $response = $this->executeHttpRequest("invoice", $payload);
+        $responseBody = (string) $response->getBody();
+        $responseJson = json_decode($responseBody, true);
+
+        if (empty($responseJson)) {
+            throw new RequestException("Server responded with empty response.");
+        }
+
+        return $responseJson;
+    }
 }
