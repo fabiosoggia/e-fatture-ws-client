@@ -5,6 +5,7 @@ namespace CloudFinance\EFattureWsClient\V1;
 use CloudFinance\EFattureWsClient\InvoiceBuilder;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use GuzzleHttp\Exception\TransferException;
+use CloudFinance\EFattureWsClient\V1\User;
 
 class Client
 {
@@ -94,6 +95,32 @@ class Client
         $xml = $invoice->saveXML();
         $payload = [ "invoice" => $xml ];
         $response = $this->executeHttpRequest("invoice", $payload);
+        $responseBody = (string) $response->getBody();
+        $responseJson = json_decode($responseBody, true);
+
+        if (empty($responseJson)) {
+            throw new RequestException("Server responded with empty response.");
+        }
+
+        return $responseJson;
+    }
+
+    public function setUser(User $user, bool $receives, bool $transmits)
+    {
+        $user->validate();
+
+        $payload = [
+            "user" => [
+                "nome" => $user->nome,
+                "idPaese" => $user->idPaese,
+                "codiceFiscale" => $user->codiceFiscale,
+                "partitaIva" => $user->partitaIva
+            ],
+            "receives" => $receives,
+            "transmits" => $transmits
+        ];
+
+        $response = $this->executeHttpRequest("user", $payload);
         $responseBody = (string) $response->getBody();
         $responseJson = json_decode($responseBody, true);
 
