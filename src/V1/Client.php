@@ -4,6 +4,7 @@ namespace CloudFinance\EFattureWsClient\V1;
 
 use CloudFinance\EFattureWsClient\InvoiceBuilder;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
+use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;
 use CloudFinance\EFattureWsClient\V1\User;
 use League\ISO3166\ISO3166;
@@ -93,14 +94,15 @@ class Client
         $invoice->validate();
 
         // Effettua la richiesta
-        $xml = $invoice->saveXML();
-        $payload = [ "invoice" => $xml ];
-        $response = $this->executeHttpRequest("invoice", $payload);
+        $invoiceXml = $invoice->saveXML();
+        $payload = [ "invoiceXml" => $invoiceXml ];
+        $response = $this->executeHttpRequest("invoices", $payload);
         $responseBody = (string) $response->getBody();
+
         $responseJson = json_decode($responseBody, true);
 
         if (empty($responseJson)) {
-            throw new RequestException("Server responded with empty response.");
+            throw new EFattureWsClientException("Server responded with unparsable message: \n\n $responseBody");
         }
 
         return $responseJson;
