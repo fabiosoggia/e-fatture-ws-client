@@ -2,8 +2,6 @@
 
 namespace CloudFinance\EFattureWsClient;
 
-require_once __DIR__ . "/../vendor/autoload.php";
-
 use CloudFinance\EFattureWsClient\Exceptions\UnsupportedClientVersion;
 
 class ClientBuilder
