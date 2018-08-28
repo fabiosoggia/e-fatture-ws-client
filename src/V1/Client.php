@@ -6,6 +6,7 @@ use CloudFinance\EFattureWsClient\InvoiceBuilder;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use CloudFinance\EFattureWsClient\V1\User;
+use League\ISO3166\ISO3166;
 
 class Client
 {
@@ -105,28 +106,39 @@ class Client
         return $responseJson;
     }
 
-    public function setUser(User $user, bool $receives, bool $transmits)
+    public function setUser(string $kind, string $idPaese, string $codice, bool $receives, bool $transmits)
     {
-        $user->validate();
+        $kind = \strtolower(\trim($kind));
+        if (!in_array($kind, ["cf", "piva"])) {
+            throw new EFattureWsClientException("Field 'kind' must be 'cf' or 'piva'.");
+        }
+
+        $idPaese = \strtoupper(\trim($idPaese));
+        try {
+            (new ISO3166)->alpha2($idPaese);
+        } catch (\Exception $ex) {
+            throw new EFattureWsClientException("Field 'kind' is not a valid ISO3166 country code.");
+        }
+
+        $codice = \strtolower(\trim($codice));
+        if (empty($codice)) {
+            throw new EFattureWsClientException("Field 'codice' is empty.");
+        }
+        if (strlen($codice) > 28) {
+            throw new EFattureWsClientException("Field 'codice' is longer than 28 characters.");
+        }
 
         $payload = [
-            "user" => [
-                "nome" => $user->nome,
-                "idPaese" => $user->idPaese,
-                "codiceFiscale" => $user->codiceFiscale,
-                "partitaIva" => $user->partitaIva
-            ],
-            "receives" => $receives,
-            "transmits" => $transmits
+            "kind" => $kind,
+            "idPaese" => $idPaese,
+            "codice" => $codice,
+            "receives" => \intval($receives),
+            "transmits" => \intval($transmits)
         ];
 
-        $response = $this->executeHttpRequest("user", $payload);
+        $response = $this->executeHttpRequest("users", $payload);
         $responseBody = (string) $response->getBody();
         $responseJson = json_decode($responseBody, true);
-
-        if (empty($responseJson)) {
-            throw new RequestException("Server responded with empty response.");
-        }
 
         return $responseJson;
     }
