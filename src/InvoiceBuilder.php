@@ -308,4 +308,21 @@ class InvoiceBuilder
 
         return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
     }
+
+    public function generateFileName($suffix = "_")
+    {
+        $idPaese = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
+        $idCodice = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+
+        if (empty($idPaese)) {
+            throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdPaese' field.");
+        }
+
+        if (empty($idCodice)) {
+            throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdCodice' field.");
+        }
+
+        $fileName = \strtoupper($idPaese . $idCodice) . $suffix;
+        return $fileName;
+    }
 }
