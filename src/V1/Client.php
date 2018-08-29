@@ -2,7 +2,7 @@
 
 namespace CloudFinance\EFattureWsClient\V1;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceBuilder;
+use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;
@@ -83,7 +83,7 @@ class Client
 		return $messageDigest;
     }
 
-    public function sendInvoice(InvoiceBuilder $invoice)
+    public function sendInvoice(InvoiceData $invoice)
     {
         // Compila campi "obbligatori"
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");

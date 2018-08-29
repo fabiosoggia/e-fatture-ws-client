@@ -9,7 +9,7 @@ use CloudFinance\EFattureWsClient\Iso3166;
 
 define("FATTURA_PA_1_2_NAMESPACE", "http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2");
 
-class InvoiceBuilder
+class InvoiceData
 {
     protected $domDocument;
     protected $rootNode;
@@ -325,4 +325,67 @@ class InvoiceBuilder
         $fileName = \strtoupper($idPaese . $idCodice) . $suffix;
         return $fileName;
     }
+
+    public function getTrasmittente()
+    {
+        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
+        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+
+        return $idPaese . $idCodice;
+    }
+
+    public function getProgressivoInvio()
+    {
+        $progressivoInvio = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio");
+
+        return $progressivoInvio;
+    }
+
+    public function getCedentePrestatore()
+    {
+        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese");
+        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdCodice");
+        $codiceFiscale = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/CodiceFiscale");
+
+        return [
+            "idPaese" => $idPaese,
+            "idCodice" => $idCodice,
+            "codiceFiscale" => $codiceFiscale,
+        ];
+    }
+
+    public function getCessionarioCommittente()
+    {
+        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdPaese");
+        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice");
+        $codiceFiscale = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/CodiceFiscale");
+
+        return [
+            "idPaese" => $idPaese,
+            "idCodice" => $idCodice,
+            "codiceFiscale" => $codiceFiscale,
+        ];
+    }
+
+    public function getFormatoTrasmissione()
+    {
+        $formatoTrasmissione = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione");
+
+        return \strtoupper($formatoTrasmissione);
+    }
+
+    public function getCodiceDestinatario()
+    {
+        $codiceDestinatario = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario");
+
+        return $codiceDestinatario;
+    }
+
+    public function getPecDestinatario()
+    {
+        $pecDestinatario = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario");
+
+        return $pecDestinatario;
+    }
+
 }
