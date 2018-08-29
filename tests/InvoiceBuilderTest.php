@@ -3,7 +3,7 @@
 namespace CloudFinance\EFattureWsClient\Tests;
 
 use PHPUnit\Framework\TestCase;
-use CloudFinance\EFattureWsClient\InvoiceBuilder;
+use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceBuilder;
 
 class InvoiceBuilderTest extends TestCase
 {

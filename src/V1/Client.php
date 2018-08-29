@@ -2,7 +2,7 @@
 
 namespace CloudFinance\EFattureWsClient\V1;
 
-use CloudFinance\EFattureWsClient\InvoiceBuilder;
+use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceBuilder;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;

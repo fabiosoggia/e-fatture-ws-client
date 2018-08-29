@@ -1,6 +1,6 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient;
+namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
@@ -125,7 +125,7 @@ class InvoiceBuilder
         $this->normalize();
 
         $internalErrorPreviousValue = libxml_use_internal_errors(true);
-        $schema = __DIR__ . "/../resources/Schema_del_file_xml_FatturaPA_versione_1.2.xsd";
+        $schema = __DIR__ . "/../../../resources/Schema_del_file_xml_FatturaPA_versione_1.2.xsd";
         if ($this->domDocument->schemaValidate($schema)) {
             libxml_use_internal_errors($internalErrorPreviousValue);
             return;
