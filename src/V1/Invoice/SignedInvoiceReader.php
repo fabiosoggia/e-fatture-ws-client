@@ -26,11 +26,22 @@ class SignedInvoiceReader
     {
         $fileName = \trim($fileName);
 
-        if (preg_match('/.p7m$/i', $fileName) === 1) {
+        if (preg_match('/.xml.p7m$/i', $fileName) === 1) {
             return SIGNING_METHOD_CADES_BES;
         }
         if (preg_match('/.xml$/i', $fileName) === 1) {
             return SIGNING_METHOD_XADES_BES;
+        }
+        return false;
+    }
+
+    public static function getFileExtensionBySigningMethod(string $signingMethod)
+    {
+        if ($signingMethod === SIGNING_METHOD_CADES_BES) {
+            return "xml.p7m";
+        }
+        if ($signingMethod === SIGNING_METHOD_XADES_BES) {
+            return "xml";
         }
         return false;
     }
