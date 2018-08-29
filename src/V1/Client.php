@@ -6,7 +6,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;
-use CloudFinance\EFattureWsClient\V1\User;
+use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use League\ISO3166\ISO3166;
 
 class Client
@@ -100,6 +100,29 @@ class Client
         $responseBody = (string) $response->getBody();
 
         $responseJson = json_decode($responseBody, true);
+
+        if (empty($responseJson)) {
+            throw new EFattureWsClientException("Server responded with unparsable message: \n\n $responseBody");
+        }
+
+        return $responseJson;
+    }
+
+    public function uploadInvoice(SignedInvoiceReader $signedInvoiceReader)
+    {
+        $invoice = $signedInvoiceReader->getInvoiceData();
+
+        // Valida contenuto della fattura
+        $invoice->validate();
+
+        $signingMethod = $signedInvoiceReader->getSigningMethod();
+        $signedInvoiceXml = $signedInvoiceReader->getFileSignedContent();
+        $payload = [
+            "signingMethod" => $signingMethod,
+            "signedInvoiceXml" => $signedInvoiceXml
+        ];
+        $response = $this->executeHttpRequest("files", $payload);
+        $responseBody = (string) $response->getBody();
 
         if (empty($responseJson)) {
             throw new EFattureWsClientException("Server responded with unparsable message: \n\n $responseBody");
