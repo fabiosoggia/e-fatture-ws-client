@@ -10,10 +10,10 @@ define("SIGNING_METHOD_XADES_BES", "XAdES-BES");
 
 class SignedInvoiceReader
 {
-    private $filePlainPath;
+    private $filePlainContent;
     private $filePlainFingerprint;
 
-    private $fileSignedPath;
+    private $fileSignedContent;
     private $fileSignedFingerprint;
 
     private $signingMethod;
@@ -54,49 +54,45 @@ class SignedInvoiceReader
 
         $invoice = new self;
 
-        $invoice->fileSignedPath = \tempnam(\sys_get_temp_dir(), "fsp");
-        $invoice->filePlainPath = \tempnam(\sys_get_temp_dir(), "fpp");
+        $fileSignedPath = \tempnam(\sys_get_temp_dir(), "fsp");
+        $filePlainPath = \tempnam(\sys_get_temp_dir(), "fpp");
 
-        $res = \file_put_contents($invoice->fileSignedPath, $string);
+        if (($fileSignedPath === false) || ($filePlainPath === false)) {
+            throw new EFattureWsClientException("Unable to create temporary files.");
+        }
+
+        $res = \file_put_contents($fileSignedPath, $string);
         if ($res === false) {
-            throw new EFattureWsClientException("Unable to write encryped file");
+            throw new EFattureWsClientException("Unable to write temporary files.");
         }
 
         if ($signingMethod === "CAdES-BES") {
             $openSslCommand = "openssl smime -verify -noverify -in '%s' -inform DER -out '%s'";
-            $openSslCommand = \sprintf($openSslCommand, $invoice->fileSignedPath, $invoice->filePlainPath);
-            $res = \exec($openSslCommand);
+            $openSslCommand = \sprintf($openSslCommand, $fileSignedPath, $filePlainPath);
+            $res = \exec($openSslCommand, $output);
         }
 
         if ($signingMethod === "XAdES-BES") {
-            $res = \file_put_contents($invoice->filePlainPath, $string);
+            $res = \file_put_contents($filePlainPath, $string);
         }
 
-        $invoice->filePlainFingerprint = \md5_file($invoice->filePlainPath);
-        $invoice->fileSignedFingerprint = \md5_file($invoice->fileSignedPath);
+        $invoice->fileSignedContent = $string;
+        $invoice->fileSignedFingerprint = \md5($invoice->fileSignedContent);
+
+        $invoice->filePlainContent = \file_get_contents($filePlainPath);
+        $invoice->filePlainFingerprint = \md5($invoice->filePlainContent);
 
         $invoice->signingMethod = $signingMethod;
 
+        unlink($fileSignedPath);
+        unlink($filePlainPath);
+
+        if (empty($invoice->filePlainContent)) {
+            throw new EFattureWsClientException("Openssl was unable to decrypt file.");
+        }
+
         $invoice->invoiceData = new InvoiceData($invoice->getFilePlainContent());
-
         return $invoice;
-    }
-
-    function __destruct() {
-        $this->clear();
-    }
-
-    public function clear()
-    {
-        if (\file_exists($this->fileSignedPath)) {
-            \unlink($this->fileSignedPath);
-            $this->fileSignedPath = null;
-        }
-
-        if (\file_exists($this->filePlainPath)) {
-            \unlink($this->filePlainPath);
-            $this->filePlainPath = null;
-        }
     }
 
     public function getInvoiceData()
@@ -106,12 +102,12 @@ class SignedInvoiceReader
 
     public function getFilePlainContent()
     {
-        return file_get_contents($this->filePlainPath);
+        return $this->filePlainContent;
     }
 
     public function getFileSignedContent()
     {
-        return file_get_contents($this->fileSignedPath);
+        return $this->fileSignedContent;
     }
 
     public function getFilePlainFingerprint()
