@@ -69,6 +69,44 @@ class InvoiceData
         }
     }
 
+    /**
+     * Questo metodo restituisce una stringa univoca che identifica la struttura
+     * dell'XML. La stringa ottenuta è indipendente dalla posizione dei nodi
+     * all'interno della struttura ad albero della fattura. As esempio, i
+     * seguenti xml porteranno allo stesso risultato:
+     *
+     *         <radice>                     <radice>
+     *             <a>Valore A</a>              <b>Valore B</b>
+     *             <b>Valore B</b>              <a>Valore A</a>
+     *         </radice>                    </radice>
+     *
+     * @return string
+     */
+    public function getFingerprint()
+    {
+        $this->normalize();
+
+        $nodeList = $this->domXPath->query('//*[not(*)]');
+        $nodes = [];
+        foreach ($nodeList as $node) {
+            $localPath = [
+                $node->nodeName,
+                $node->nodeValue
+            ];
+            $currentNode = $node->parentNode;
+            $k = 0;
+            while (!empty($currentNode) && ($k++ < 50)) {
+                array_unshift($localPath, $currentNode->nodeName);
+                $currentNode = $currentNode->parentNode;
+            }
+
+            $nodes[] = \strtolower(\implode("|", $localPath));
+        }
+        sort($nodes);
+        $fingerprint = \md5(\json_encode($nodes));
+        return $fingerprint;
+    }
+
     private function normalizeXml(string $xml)
     {
         // Espandi nodi vuoti

@@ -245,4 +245,106 @@ class InvoiceDataTest extends TestCase
         $result = $builder->has("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $this->assertFalse($result, "Il metodo has() ha restituito true per un nodo vuoto.");
     }
+
+    public function testGetFingerprint()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>000000</IdCodice>
+                </IdTrasmittente>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() ha generato una fingerprint diversa.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdCodice>000000</IdCodice>
+                    <IdPaese>IT</IdPaese>
+                </IdTrasmittente>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto della posizione locale dei tag.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdCodice>000000</IdCodice>
+                    <IdPaese>IT</IdPaese>
+                </IdTrasmittente>
+                <ProgressivoInvio></ProgressivoInvio>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto dei tag vuoti.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice id="test">000000</IdCodice>
+                </IdTrasmittente>
+                <ProgressivoInvio></ProgressivoInvio>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto degli attributi dei tag.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdPaese>IT</IdPaese>
+                    <IdCodice>000001</IdCodice>
+                </IdTrasmittente>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del valori dei tag.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdPaese>IT</IdPaese>
+                </IdTrasmittente>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag mancanti.");
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <IdTrasmittente>
+                    <IdPaese1>IT</IdPaese1>
+                    <IdCodice>000000</IdCodice>
+                </IdTrasmittente>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = new InvoiceData($xml);
+        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
+    }
 }
