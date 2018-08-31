@@ -3,6 +3,7 @@
 namespace CloudFinance\EFattureWsClient\V1;
 
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
+use CloudFinance\EFattureWsClient\V1\Digest;
 use CloudFinance\EFattureWsClient\Exceptions\RequestException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;
@@ -77,10 +78,8 @@ class Client
 
     public function createDigest(array $payload)
     {
-        $payload = ksort($payload);
-		$apiKey = $this->privateKey;
-		$messageDigest = \hash_hmac("sha256", json_encode($payload), $apiKey);
-		return $messageDigest;
+        $digest = new Digest($this->uuid, $this->privateKey, $payload);
+		return (string) $digest;
     }
 
     public function sendInvoice(InvoiceData $invoice)
