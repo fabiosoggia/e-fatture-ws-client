@@ -156,8 +156,8 @@ class Client
             "kind" => $kind,
             "idPaese" => $idPaese,
             "codice" => $codice,
-            "receives" => \intval($receives),
-            "transmits" => \intval($transmits)
+            "receives" => \intval($receives) . "",
+            "transmits" => \intval($transmits) . ""
         ];
 
         $response = $this->executeHttpRequest("users", $payload);
