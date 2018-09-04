@@ -19,6 +19,79 @@ class Client
     public $endpoint = "http://localhost/eFATTURE-ws/public/api/v1/";
     public $timeout = 2.0;
 
+
+    /**
+     * Questi messaggi le risposte ricevute dal ws dal sdi quando sono inviate
+     * le fatture/notifiche.
+     */
+    public const WEBHOOK_KIND_API_INVIO_FATTURA = "webhook_kind_api_invio_fattura";
+    public const WEBHOOK_KIND_API_INVIO_NOTIFICA = "webhook_kind_api_invio_notifica";
+
+
+    /**
+     * È il file inviato dal SdI al soggetto ricevente insieme al file fattura e
+     * contenente i dati principali di riferimento del file utili per
+     * l’elaborazione, ivi compreso l’identificativo del SdI.
+     */
+    public const WEBHOOK_KIND_SDI_RICEVI_FATTURA = "webhook_kind_sdi_ricevi_fattura";
+
+
+    /**
+     * È la notifica inviata dal SdI al soggetto trasmittente nei casi in cui
+     * non sia stato superato uno o più controlli tra quelli effettuati dal SdI
+     * sul file ricevuto.
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO = "webhook_kind_sdi_notifica_scarto";
+
+
+    /**
+     * È la notifica inviata dal SdI al soggetto trasmittente per attestare
+     * l’avvenuta ricezione della fattura e l’impossibilità di recapitare il
+     * file al destinatario; la casistica si riferisce:
+     *  - alla presenza del codice destinatario valorizzato a “999999” e
+     *    all’impossibilità di identificare univocamente nell’anagrafica di
+     *    riferimento, IPA, un ufficio di fatturazione elettronica associato al
+     *    codice fiscale corrispondente all’identificativo fiscale del
+     *    cessionario\committente riportato in fattura;
+     *  - alla mancata disponibilità tecnica di comunicazione con il destinatario.
+     */
+    public const WEBHOOK_KIND_SDI_TRASMISSIONE_SENZA_RECAPITO_FATTURA = "webhook_kind_sdi_trasmissione_senza_recapito_fattura";
+
+
+    /**
+     * È la ricevuta inviata dal SdI al soggetto trasmittente per comunicare
+     * l’avvenuta consegna del file al destinatario.
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_RICEVUTA_CONSEGNA = "webhook_kind_sdi_notifica_ricevuta_consegna";
+    /**
+     * È la notifica inviata dal SdI al soggetto trasmittente nei casi in cui
+     * fallisca l’operazione di consegna del file al destinatario.
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_MANCATA_CONSEGNA = "webhook_kind_sdi_notifica_mancata_consegna";
+
+
+    /**
+     * È la notifica inviata dal SdI al soggetto trasmittente per comunicare
+     * l’esito (accettazione o rifiuto della fattura) dei controlli effettuati
+     * sul documento ricevuto dal destinatario.
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_ESITO = "webhook_kind_sdi_notifica_esito";
+    /**
+     * È la notifica inviata dal SdI al soggetto ricevente per comunicare
+     * eventuali incoerenze o errori nell’esito inviato al SdI precedentemente
+     * (accettazione o rifiuto della fattura).
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO_ESITO = "webhook_kind_sdi_notifica_scarto_esito";
+
+
+    /**
+     * È la notifica inviata dal SdI sia al soggetto trasmittente che al
+     * soggetto ricevente per comunicare la decorrenza del termine limite per
+     * la comunicazione dell’accettazione/rifiuto.
+     */
+    public const WEBHOOK_KIND_SDI_NOTIFICA_DECORRENZA_TERMINI = "webhook_kind_sdi_notifica_decorrenza_termini";
+
+
     public function setUuid(string $uuid)
     {
         $this->uuid = $uuid;
@@ -27,6 +100,36 @@ class Client
     public function setPrivateKey(string $privateKey)
     {
         $this->privateKey = $privateKey;
+    }
+
+    public function parse($efSignature, $efPayload)
+    {
+        if (empty($efSignature)) {
+            throw new \InvalidArgumentException("Parameter 'efSignature' can't be empty.");
+        }
+        if (empty($efPayload)) {
+            throw new \InvalidArgumentException("Parameter 'efPayload' can't be empty.");
+        }
+
+        $digest = new Digest($this->uuid, $this->privateKey, $efPayload);
+        if (!$digest->verify($efSignature)) {
+            throw new \InvalidArgumentException("Mismatching signature.");
+        }
+
+        $data = [];
+        $data["webhookKind"] = __::get($efPayload, "webhookKind");
+        $data["sdiInvoiceFileId"] = intval(__::get($efPayload, "sdiInvoiceFileId"));
+
+        if ($data["sdiInvoiceFileId"] <= 0) {
+            throw new EFattureWsClientException("Invalid payload received.");
+        }
+
+        $sdiNotificationFileId = intval(__::get($efPayload, "sdiInvoiceFileId"));
+        if ($sdiNotificationFileId > 0) {
+            $data["sdiNotificationFileId"] = $sdiNotificationFileId;
+        }
+
+        return (object) $data;
     }
 
     public function executeHttpRequest($command, array $payload)
