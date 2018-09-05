@@ -9,6 +9,7 @@ use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use GuzzleHttp\Exception\TransferException;
 use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use League\ISO3166\ISO3166;
+use CloudFinance\EFattureWsClient\V1\Invoice\NotificaEsito;
 
 class Client
 {
@@ -264,6 +265,32 @@ class Client
         ];
 
         $response = $this->executeHttpRequest("users", $payload);
+        $responseBody = (string) $response->getBody();
+        $responseJson = json_decode($responseBody, true);
+
+        return $responseJson;
+    }
+
+    /**
+     * Invia una notifica di esito per la fattura RICEVUTA.
+     *
+     * @param integer $sdiInvoiceFileId
+     * @param boolean $accept
+     * @param string $descrizione
+     * @param string $riferimentoFattura Descrive a quale fattura si riferisce l’esito; se non valorizzato si intende riferito a tutte le fatture presenti nel file.
+     * @return void
+     */
+    public function sendEsito(int $sdiInvoiceFileId, NotificaEsito $notificaEsito)
+    {
+        $notificaEsito->setIdentificativoId("111");
+        $notificaEsito->validate();
+
+        $payload = [
+            "sdiInvoiceFileId" => $sdiInvoiceFileId . "",
+            "notificaEsitoXml" => $notificaEsito->saveXML()
+        ];
+
+        $response = $this->executeHttpRequest("notifications", $payload);
         $responseBody = (string) $response->getBody();
         $responseJson = json_decode($responseBody, true);
 
