@@ -2,7 +2,7 @@
 
 namespace CloudFinance\EFattureWsClient\Exceptions;
 
-use CloudFinance\EFattureWsClient\Exceptions\EFattureException;
+use CloudFinance\EFattureWsClient\Exceptions\EFattureWsException;
 
 class EFattureWsClientException extends \Exception implements EFattureWsException {
 
