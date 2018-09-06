@@ -290,7 +290,7 @@ class NotificaEsito
         return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
     }
 
-    public function setIdentificativoId(string $indentificativoId)
+    public function setIdentificativoSdi(string $indentificativoId)
     {
         $this->set("/NotificaEsitoCommittente/IdentificativoSdI", $indentificativoId);
     }
