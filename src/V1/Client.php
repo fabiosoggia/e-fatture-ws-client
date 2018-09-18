@@ -34,7 +34,7 @@ class Client
      * contenente i dati principali di riferimento del file utili per
      * l’elaborazione, ivi compreso l’identificativo del SdI.
      */
-    public const WEBHOOK_KIND_SDI_RICEVI_FATTURA = "webhook_kind_sdi_ricevi_fattura";
+    public const WEBHOOK_KIND_SDI_RICEVI_FATTURA = "riceviFatture";
 
 
     /**
@@ -42,7 +42,7 @@ class Client
      * non sia stato superato uno o più controlli tra quelli effettuati dal SdI
      * sul file ricevuto.
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO = "webhook_kind_sdi_notifica_scarto";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO = "notificaScarto";
 
 
     /**
@@ -56,19 +56,19 @@ class Client
      *    cessionario\committente riportato in fattura;
      *  - alla mancata disponibilità tecnica di comunicazione con il destinatario.
      */
-    public const WEBHOOK_KIND_SDI_TRASMISSIONE_SENZA_RECAPITO_FATTURA = "webhook_kind_sdi_trasmissione_senza_recapito_fattura";
+    // public const WEBHOOK_KIND_SDI_TRASMISSIONE_SENZA_RECAPITO_FATTURA = "notificaMancataConsegna";
 
 
     /**
      * È la ricevuta inviata dal SdI al soggetto trasmittente per comunicare
      * l’avvenuta consegna del file al destinatario.
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_RICEVUTA_CONSEGNA = "webhook_kind_sdi_notifica_ricevuta_consegna";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_RICEVUTA_CONSEGNA = "ricevutaConsegna";
     /**
      * È la notifica inviata dal SdI al soggetto trasmittente nei casi in cui
      * fallisca l’operazione di consegna del file al destinatario.
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_MANCATA_CONSEGNA = "webhook_kind_sdi_notifica_mancata_consegna";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_MANCATA_CONSEGNA = "notificaMancataConsegna";
 
 
     /**
@@ -76,13 +76,13 @@ class Client
      * l’esito (accettazione o rifiuto della fattura) dei controlli effettuati
      * sul documento ricevuto dal destinatario.
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_ESITO = "webhook_kind_sdi_notifica_esito";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_ESITO = "notificaEsito";
     /**
      * È la notifica inviata dal SdI al soggetto ricevente per comunicare
      * eventuali incoerenze o errori nell’esito inviato al SdI precedentemente
      * (accettazione o rifiuto della fattura).
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO_ESITO = "webhook_kind_sdi_notifica_scarto_esito";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO_ESITO = "notificaScarto";
 
 
     /**
@@ -90,7 +90,7 @@ class Client
      * soggetto ricevente per comunicare la decorrenza del termine limite per
      * la comunicazione dell’accettazione/rifiuto.
      */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_DECORRENZA_TERMINI = "webhook_kind_sdi_notifica_decorrenza_termini";
+    public const WEBHOOK_KIND_SDI_NOTIFICA_DECORRENZA_TERMINI = "notificaDecorrenzaTermini";
 
 
     public function setUuid(string $uuid)
