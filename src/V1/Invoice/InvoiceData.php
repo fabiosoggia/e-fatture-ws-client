@@ -44,7 +44,7 @@ class InvoiceData
 
         $this->domDocument = new \DOMDocument();
         try {
-            $this->domDocument->loadXML($xml);
+            $this->domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
         } catch (\Exception $ex) {
             $error = sprintf("Invalid invoice XML: %s.", $ex->getMessage());
             throw new InvalidInvoice($error, $ex->getCode());
@@ -337,8 +337,10 @@ class InvoiceData
      */
     public function saveXML($prettyPrint = false)
     {
+        $this->domDocument->preserveWhiteSpace = false;
+        $this->domDocument->formatOutput = false;
+
         if ($prettyPrint) {
-            $this->domDocument->preserveWhiteSpace = false;
             $this->domDocument->formatOutput = true;
         }
 
