@@ -19,7 +19,7 @@ class Client
     public $method = "POST";
     public $endpoint = "http://localhost/eFATTURE-ws/public/api/v1/";
     public $timeout = 2.0;
-
+    public $verify = true;
 
     /**
      * Questi messaggi le risposte ricevute dal ws dal sdi quando sono inviate
@@ -149,6 +149,7 @@ class Client
         $client = new \GuzzleHttp\Client([
             'base_uri' => $this->endpoint,
             'timeout'  => $this->timeout,
+            'verify' => $this->verify
         ]);
 
         try {
