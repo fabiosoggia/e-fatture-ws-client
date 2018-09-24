@@ -192,10 +192,6 @@ class NotificaEsito
             $parentNode = $node;
         }
 
-        if (empty($parentNode)) {
-            throw new EFattureWsClientException("Unable to retriveNode() in path '$path'.");
-        }
-
         return $parentNode;
     }
 
@@ -215,6 +211,11 @@ class NotificaEsito
     {
         $path = $this->normalizePath($path);
         $node = $this->retrieveNode($path, true);
+
+        if (empty($node)) {
+            throw new EFattureWsClientException("Unable to retriveNode() in path '$path'.");
+        }
+
         $node->nodeValue = \trim($value);
     }
 
