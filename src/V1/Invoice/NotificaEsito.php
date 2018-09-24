@@ -192,6 +192,10 @@ class NotificaEsito
             $parentNode = $node;
         }
 
+        if (empty($parentNode)) {
+            throw new EFattureWsClientException("Unable to retriveNode() in path '$path'.");
+        }
+
         return $parentNode;
     }
 
