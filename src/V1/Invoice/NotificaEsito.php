@@ -173,10 +173,17 @@ class NotificaEsito
 
             $tempPath = $currentPath . "/" . $tag;
             $nodes = $this->domXPath->query($tempPath);
-            $nodesCount = \count($nodes);
+            $nodesCount = $nodes->length;
+            $node = null;
 
             if ($nodesCount > $index - 1) {
                 $node = $nodes->item($index - 1);
+
+                if ($node === null) {
+                    $m = \sprintf("NotificaEsito: Index '%d' is not valid in path '%s' (%d).", $index - 1, $tempPath, $nodesCount);
+                    throw new EFattureWsClientException($m);
+                }
+
             } else {
                 if (!$createIfNotExists) {
                     return null;
@@ -184,6 +191,12 @@ class NotificaEsito
 
                 for ($n = $nodesCount; $n < $index; $n++) {
                     $node = $this->domDocument->createElementNS(null, $tag);
+
+                    if ($node === false) {
+                        $m = \sprintf("NotificaEsito: Unable to create <%s> at path \n%s\n%d", $tag, $tempPath, $n);
+                        throw new EFattureWsClientException($m);
+                    }
+
                     $parentNode->appendChild($node);
                 }
             }
@@ -213,7 +226,8 @@ class NotificaEsito
         $node = $this->retrieveNode($path, true);
 
         if (empty($node)) {
-            throw new EFattureWsClientException("Unable to retriveNode() in path '$path'.");
+            $m = \sprintf("NotificaEsito: Retrieved empty node for path %s", $path);
+            throw new EFattureWsClientException($m);
         }
 
         $node->nodeValue = \trim($value);
@@ -249,7 +263,7 @@ class NotificaEsito
         $path = $this->normalizePath($path);
         $path = str_replace("NotificaEsitoCommittente/", "/*/", $path);
         $nodes = $this->domXPath->query($path);
-        if (\count($nodes) === 0) {
+        if ($nodes->length === 0) {
             return $default;
         }
         $node = $nodes->item(0);
