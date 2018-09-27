@@ -18,7 +18,7 @@ class Client
 
     public $method = "POST";
     public $endpoint = "http://localhost/eFATTURE-ws/public/api/v1/";
-    public $timeout = 2.0;
+    public $timeout = 5.0;
     public $verify = true;
 
     /**
@@ -283,7 +283,7 @@ class Client
      */
     public function sendEsito(int $sdiInvoiceFileId, NotificaEsito $notificaEsito)
     {
-        $notificaEsito->setIdentificativoId("111");
+        $notificaEsito->setIdentificativoSdi("111");
         $notificaEsito->validate();
 
         $payload = [

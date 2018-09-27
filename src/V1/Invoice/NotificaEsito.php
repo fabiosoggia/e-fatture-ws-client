@@ -33,6 +33,15 @@ class NotificaEsito
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                     versione="1.0"
                     xsi:schemaLocation="http://www.fatturapa.gov.it/sdi/messaggi/v1.0 MessaggiTypes_v1.0.xsd ">
+                    <IdentificativoSdI>111</IdentificativoSdI>
+                    <RiferimentoFattura>
+                        <NumeroFattura></NumeroFattura>
+                        <AnnoFattura></AnnoFattura>
+                        <PosizioneFattura></PosizioneFattura>
+                    </RiferimentoFattura>
+                    <Esito></Esito>
+                    <Descrizione></Descrizione>
+                    <MessageIdCommittente>000000</MessageIdCommittente>
                 </types:NotificaEsitoCommittente>';
         }
 
