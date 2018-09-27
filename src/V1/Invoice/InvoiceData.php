@@ -164,14 +164,19 @@ class InvoiceData
 
         $internalErrorPreviousValue = libxml_use_internal_errors(true);
         $schema = __DIR__ . "/../../../resources/Schema_del_file_xml_FatturaPA_versione_1.2.xsd";
-        if ($this->domDocument->schemaValidate($schema)) {
+        if (!$this->domDocument->schemaValidate($schema)) {
+            $error = libxml_get_last_error();
             libxml_use_internal_errors($internalErrorPreviousValue);
-            return;
+            throw new InvalidInvoice($error->message, $error->code);
         }
-
-        $error = libxml_get_last_error();
         libxml_use_internal_errors($internalErrorPreviousValue);
-        throw new InvalidInvoice($error->message, $error->code);
+
+        // La dimensione massima della fattura è di 5MB, ma devo lasciare un po'
+        // di spazio per riempire i tag lato server e per firmare il file.
+        $xmlData = $this->saveXML(false);
+        if (\strlen($xmlData) > 4718592) {
+            throw new InvalidInvoice("The invoice size is bigger than 4.5MB.");
+        }
     }
 
     /**

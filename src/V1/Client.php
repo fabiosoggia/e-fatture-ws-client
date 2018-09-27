@@ -221,6 +221,11 @@ class Client
 
         $signingMethod = $signedInvoiceReader->getSigningMethod();
         $signedInvoiceXml = $signedInvoiceReader->getFileSignedContent();
+
+        if (\strlen($signedInvoiceXml) > 4718592) {
+            throw new InvalidInvoice("The invoice size is bigger than 5MB.");
+        }
+
         $payload = [
             "signingMethod" => $signingMethod,
             "signedInvoiceXml" => $signedInvoiceXml
