@@ -66,7 +66,7 @@ class InvoiceData extends XmlWrapper
     public function normalize()
     {
         // Leggi il formato
-        $formato = $this->get("/FatturaElettronica/FatturaElettronicaHeader/FormatoTrasmissione", self::FATTURA_B2B);
+        $formato = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", self::FATTURA_B2B);
         $this->setFormatoTrasmissione($formato);
         parent::normalize();
     }
