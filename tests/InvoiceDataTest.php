@@ -10,134 +10,48 @@ class InvoiceDataTest extends TestCase
     public function testNormalizeXML()
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
                     <IdCodice>Test 01</IdCodice>
                 </IdTrasmittente>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
+        $builder = InvoiceData::loadXML($xml);
         $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
                     <IdCodice>Test 01</IdCodice>
                 </IdTrasmittente>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>', "La normalizzazione ha apportato cambiamenti non previsti.");
 
-
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
+                <IdTrasmittente />
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
+        $builder = InvoiceData::loadXML($xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+                <FatturaElettronicaHeader>
+                    <DatiTrasmissione>
+                    <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+                    </DatiTrasmissione>
+                </FatturaElettronicaHeader>
             </p:FatturaElettronica>',
-            "La normalizzazione non ha inserito i namespace.");
-
-
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <FatturaElettronica>
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>',
-            "La normalizzazione non ha inserito i prefissi a FatturaElettronica.");
-
-
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:t="test" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader>
-                <t:DatiTrasmissione>
-                <t:IdTrasmittente>
-                    <t:IdCodice>Test 01</t:IdCodice>
-                </t:IdTrasmittente>
-                </t:DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>',
-            "La normalizzazione non ha rimosso i prefissi non supportati.");
-
-
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica test="test" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader test="test">
-                <DatiTrasmissione test="test">
-                <IdTrasmittente test="test">
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <IdTrasmittente>
-                    <IdCodice>Test 01</IdCodice>
-                </IdTrasmittente>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>',
-            "La normalizzazione non ha rimosso gli attributi dei tag.");
-
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica test="test" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
-            <FatturaElettronicaHeader test="test">
-                <DatiTrasmissione test="test">
-                <IdTrasmittente test="test"/>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml, true);
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd"/>',
+            $builder->saveXML(true),
             "La normalizzazione non ha rimosso gli attributi dei tag senza contenuto.");
     }
 
@@ -145,43 +59,60 @@ class InvoiceDataTest extends TestCase
     {
         // $xml = file_get_contents("C:\\xampp\\htdocs\\eFATTURE-ws\\logs\\IT07945211006_1S2TQ.xml");
         // $xml = "";
-        $builder = new InvoiceData();
+        $builder = InvoiceData::create(InvoiceData::FATTURA_B2B);
         $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", "Test 01");
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 <IdTrasmittente>
                     <IdCodice>Test 01</IdCodice>
                 </IdTrasmittente>
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
-            </p:FatturaElettronica>', "Il metodo set() non ha settato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice.");
+            </p:FatturaElettronica>',
+            $builder->saveXML(true),
+            "Il metodo set() non ha settato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice.");
+
+
 
         $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", "Test 02");
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 <IdTrasmittente>
                     <IdCodice>Test 02</IdCodice>
                 </IdTrasmittente>
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
-            </p:FatturaElettronica>', "Il metodo set() non ha modificato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+            </p:FatturaElettronica>',
+            $builder->saveXML(true),
+            "Il metodo set() non ha modificato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 
         $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", "");
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd"></p:FatturaElettronica>',
-            "Il metodo set() non ha eliminato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice.");
-
-        $builder = new InvoiceData();
-        $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice[1]", "Test 04.1");
-        $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice[2]", "Test 04.2");
-        $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>',
+            $builder->saveXML(true),
+            "Il metodo set() non ha eliminato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice.");
+
+        $builder = InvoiceData::create(InvoiceData::FATTURA_B2B);
+        $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice[1]", "Test 04.1");
+        $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice[2]", "Test 04.2");
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
                 <IdTrasmittente>
                     <IdCodice>Test 04.1</IdCodice>
                     <IdCodice>Test 04.2</IdCodice>
@@ -189,13 +120,14 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>',
+            $builder->saveXML(true),
             "Il metodo set() non ha settato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice con indice [1] e [2].");
     }
 
     public function testGet()
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -204,7 +136,7 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml);
+        $builder = InvoiceData::loadXML($xml);
 
         $result = $builder->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
         $this->assertSame($result, "Test", "Il metodo get() non ha restituito il valore corretto.");
@@ -221,7 +153,7 @@ class InvoiceDataTest extends TestCase
     public function testHas()
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -231,7 +163,7 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $builder = new InvoiceData($xml);
+        $builder = InvoiceData::loadXML($xml);
 
         $result = $builder->has("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
         $this->assertTrue($result, "Il metodo has() non ha restituito il true.");
@@ -249,7 +181,7 @@ class InvoiceDataTest extends TestCase
     public function testGetFingerprint()
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -259,11 +191,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() ha generato una fingerprint diversa.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() ha generato una fingerprint diversa.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -273,11 +205,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto della posizione locale dei tag.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto della posizione locale dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -288,11 +220,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto dei tag vuoti.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto dei tag vuoti.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -303,11 +235,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto degli attributi dei tag.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto degli attributi dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -317,11 +249,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del valori dei tag.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del valori dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -330,11 +262,11 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag mancanti.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag mancanti.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPA12" xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
                 <DatiTrasmissione>
                 <IdTrasmittente>
@@ -344,7 +276,7 @@ class InvoiceDataTest extends TestCase
                 </DatiTrasmissione>
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
-        $invoice = new InvoiceData($xml);
-        $this->assertNotEquals("751a53af44b5fa86a0ed9ae6978d2f2f", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
     }
 }

@@ -101,7 +101,7 @@ class SignedInvoiceReader
             throw new EFattureWsClientException("Openssl was unable to decrypt file.");
         }
 
-        $invoice->invoiceData = new InvoiceData($invoice->getFilePlainContent());
+        $invoice->invoiceData = InvoiceData::loadXML($invoice->getFilePlainContent());
         return $invoice;
     }
 

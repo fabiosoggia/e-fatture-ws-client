@@ -4,373 +4,71 @@ namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
-use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoiceParameter;
-use CloudFinance\EFattureWsClient\Iso3166;
+use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\SchemaValidator;
 
-define("FATTURA_PA_1_2_NAMESPACE", "http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2");
 
-class InvoiceData
+class InvoiceData extends XmlWrapper
 {
-    protected $domDocument;
-    protected $rootNode;
-    protected $domXPath;
-    protected $fatturaPaNamespacePrefix = "p:";
+    public const FATTURA_B2G = "FPA12";
+    public const FATTURA_B2B = "FPR12";
 
-    /**
-     * Costruisci una nuova fattura. E' possibile passare al metodo una stringa
-     * contenente la rappresentazione in XML della fattura per inizializzarne
-     * il contenuto.
-     *
-     * NB: questa funzione effettua delle "normalizzazioni" sulla struttura
-     *     dell'XML. Se l'XML in input non è stato creato da questa classe,
-     *     l'XML prodotto potrebbe avere minime differenze rispetto da quello
-     *     in input anche se non sono state effettuate set().
-     *
-     * @param string $xml
-     */
-    public function __construct(string $xml = null, $normalize = false) {
-        if (empty($xml)) {
-            $xml = '<?xml version="1.0" encoding="UTF-8"?>
-                <p:FatturaElettronica versione="FPA12"
-                xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
-                xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd" />';;
-        }
+    public static function create(string $formato)
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" />';
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($xml);
+        $instance = new self($domDocument);
+        $instance->setFormatoTrasmissione($formato);
+        $instance->setupValidators();
+        return $instance;
+    }
 
-        if ($normalize) {
-            $xml = $this->normalizeXml($xml);
-        }
-
-        $this->domDocument = new \DOMDocument();
+    public static function loadXML(string $xml)
+    {
+        $domDocument = new \DOMDocument();
         try {
-            $this->domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
+            $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
         } catch (\Exception $ex) {
             $error = sprintf("Invalid invoice XML: %s.", $ex->getMessage());
             throw new InvalidInvoice($error, $ex->getCode());
         }
-
-        $this->rootNode = $this->domDocument->documentElement;
-        $this->domXPath = new \DOMXPath($this->domDocument);
-
-        if ($this->rootNode === null) {
-            throw new InvalidInvoice("Invalid invoice XML: missing root node.");
-        }
-        if ($this->rootNode->namespaceURI !== FATTURA_PA_1_2_NAMESPACE) {
-            throw new InvalidInvoice("Invalid invoice XML: root node uses invalid namespace.");
-        }
-        if ($this->rootNode->localName !== "FatturaElettronica") {
-            throw new InvalidInvoice("Invalid invoice XML: root node is not FatturaElettronica.");
-        }
-        if ($normalize) {
-            if (($this->rootNode->prefix . ":") !== $this->fatturaPaNamespacePrefix) {
-                throw new InvalidInvoice("Invalid invoice XML: invalid namespace prefix for FatturaElettronica.");
-            }
-        }
+        $instance = new self($domDocument);
+        $instance->setupValidators();
+        return $instance;
     }
 
-    /**
-     * Questo metodo restituisce una stringa univoca che identifica la struttura
-     * dell'XML. La stringa ottenuta è indipendente dalla posizione dei nodi
-     * all'interno della struttura ad albero della fattura. As esempio, i
-     * seguenti xml porteranno allo stesso risultato:
-     *
-     *         <radice>                     <radice>
-     *             <a>Valore A</a>              <b>Valore B</b>
-     *             <b>Valore B</b>              <a>Valore A</a>
-     *         </radice>                    </radice>
-     *
-     * @return string
-     */
-    public function getFingerprint()
+    private function setupValidators()
     {
-        $this->normalize();
-
-        $nodeList = $this->domXPath->query('//*[not(*)]');
-        $nodes = [];
-        foreach ($nodeList as $node) {
-            $localPath = [
-                $node->nodeName,
-                $node->nodeValue
-            ];
-            $currentNode = $node->parentNode;
-            $k = 0;
-            while (!empty($currentNode) && ($k++ < 50)) {
-                array_unshift($localPath, $currentNode->nodeName);
-                $currentNode = $currentNode->parentNode;
-            }
-
-            $nodes[] = \strtolower(\implode("|", $localPath));
-        }
-        sort($nodes);
-        $fingerprint = \md5(\json_encode($nodes));
-        return $fingerprint;
+        $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/Schema_VFPR12.xsd"));
     }
 
-    private function normalizeXml(string $xml)
+    public function setFormatoTrasmissione(string $formato)
     {
-        // Espandi nodi vuoti
-        try {
-            $domDocument = new \DOMDocument();
-            $domDocument->loadXML($xml);
-            $xml = $domDocument->saveXML(null, LIBXML_NOEMPTYTAG);
-        } catch (\Exception $ex) {
+        $formato = strtoupper($formato);
+        if (($formato !== self::FATTURA_B2G) && ($formato !== self::FATTURA_B2B)) {
+            throw new InvalidInvoice("Formato must be 'FPA12' or 'FPR12'.");
         }
 
-        // Mancano alcuni caratteri, vedere:
-        // https://www.w3.org/TR/xml/#NT-Name
-        $nameChar = 'a-z_\xC0-\xD6\xD8-\xF6\-\.0-9\xB7';
+        $attributes = $this->rootNode->attributes;
+        $domAttribute = $attributes->getNamedItem('versione');
 
-        // Rimuovi tutti prefissi dai tag di apertura con namespace
-        $xml = preg_replace('/<[' . $nameChar . ']*:/i', '<', $xml);
-        // Rimuovi tutti prefissi dai tag di chiusura con namespace
-        $xml = preg_replace('/<\/[' . $nameChar . ']*:/i', '</', $xml);
-        // Rimuovi tutti gli attributi dei tag
-        $xml = preg_replace('/<([' . $nameChar . ']+)\s[^<]*/i', '<$1>', $xml);
-
-        // Namespace di FatturaPA: tag di apertura
-        $pattern = '/<FatturaElettronica>/';
-        $replacement = '<' . $this->fatturaPaNamespacePrefix . 'FatturaElettronica versione="FPA12"
-            xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xmlns:' . \trim($this->fatturaPaNamespacePrefix, ':') . '="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2"
-            xsi:schemaLocation="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2 http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2/Schema_del_file_xml_FatturaPA_versione_1.2.xsd">';
-        $xml = preg_replace($pattern, $replacement, $xml);
-
-        // Namespace di FatturaPA: tag di chiusura
-        $pattern = '/<\/FatturaElettronica>/';
-        $replacement = '</' . $this->fatturaPaNamespacePrefix . 'FatturaElettronica>';
-        $xml = preg_replace($pattern, $replacement, $xml);
-
-        // Rimuovi spazi superflui
-        $patterns = [ '/>\s+</', '/\s\s+/' ];
-        $replacements = [ '><', ' ' ];
-        $xml = preg_replace($patterns, $replacements, $xml);
-
-        return $xml;
-    }
-
-    /**
-     * Valida la fattura costruita secondo lo standard di FatturaPA. Se la
-     * fattura è corretta questa funzione termina senza restituire nulla,
-     * altrimenti viene lanciata un'eccezione di tipo InvalidInvoice.
-     *
-     * @throws CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice
-     * @return void
-     */
-    public function validate()
-    {
-        $this->normalize();
-
-        $internalErrorPreviousValue = libxml_use_internal_errors(true);
-        $schema = __DIR__ . "/../../../resources/Schema_del_file_xml_FatturaPA_versione_1.2.xsd";
-        if (!$this->domDocument->schemaValidate($schema)) {
-            $error = libxml_get_last_error();
-            libxml_use_internal_errors($internalErrorPreviousValue);
-            throw new InvalidInvoice($error->message, $error->code);
-        }
-        libxml_use_internal_errors($internalErrorPreviousValue);
-
-        // La dimensione massima della fattura è di 5MB, ma devo lasciare un po'
-        // di spazio per riempire i tag lato server e per firmare il file.
-        $xmlData = $this->saveXML(false);
-        if (\strlen($xmlData) > 4718592) {
-            throw new InvalidInvoice("The invoice size is bigger than 4.5MB.");
-        }
-    }
-
-    /**
-     * Si assicura che $path:
-     *  - sia nel formato FatturaElettronica/aaa/bbb.
-     *
-     * @param string $path
-     * @return void
-     */
-    private function normalizePath(string $path)
-    {
-        $path = "/" . $path . "/";
-        $path = ltrim($path, "/");
-        if ((strpos($path, "FatturaElettronica/") !== 0)) {
-            $path = "FatturaElettronica/" . $path;
-        }
-        $path = \trim($path, "/");
-        return $path;
-    }
-
-    private function retrieveNode(string $path, $createIfNotExists = false)
-    {
-        $parentNode = $this->rootNode;
-        $currentPath = "/*";
-
-        $path = \trim($path, "/");
-        $tags = \explode('/', $path);
-
-        $tagRegex = '/([a-zA-Z0-9]+)(\[(\d*)\])?/i';
-
-        foreach ($tags as $token) {
-            $res = preg_match($tagRegex, $token, $matches);
-            if ($res === false) {
-                throw \Exception("Invalid regex.");
-            }
-
-            if ($res === 0) {
-                $error = sprintf("Could not parse path '%s'.", $token);
-                throw new EFattureWsClientException($error);
-            }
-
-            $tag = $matches[1];
-            $index = count($matches) === 4 ? intval($matches[3]) : 1;
-            $index = \max($index, 1);
-
-            if (empty($tag)) {
-                continue;
-            }
-
-            if ($tag === 'FatturaElettronica') {
-                continue;
-            }
-
-            $tempPath = $currentPath . "/" . $tag;
-            $nodes = $this->domXPath->query($tempPath);
-            $nodesCount = $nodes->length;
-            $node = null;
-
-            if ($nodesCount > $index - 1) {
-                $node = $nodes->item($index - 1);
-
-                if ($node === null) {
-                    $m = \sprintf("InvoiceData: Index '%d' is not valid in path '%s' (%d).", $index - 1, $tempPath, $nodesCount);
-                    throw new EFattureWsClientException($m);
-                }
-
-            } else {
-                if (!$createIfNotExists) {
-                    return null;
-                }
-
-                for ($n = $nodesCount; $n < $index; $n++) {
-                    $node = $this->domDocument->createElementNS(null, $tag);
-
-                    if ($node === false) {
-                        $m = \sprintf("InvoiceData: Unable to create <%s> at path \n%s\n%d", $tag, $tempPath, $n);
-                        throw new EFattureWsClientException($m);
-                    }
-
-                    $parentNode->appendChild($node);
-                }
-            }
-
-            $currentPath = $tempPath . "[" . $index . "]";
-            $parentNode = $node;
+        if ($domAttribute === null) {
+            $domAttribute = $this->domDocument->createAttribute('versione');
+            $this->rootNode->appendChild($domAttribute);
         }
 
-        return $parentNode;
-    }
-
-    /**
-     * Setta una proprietà della fattura. Il path della fattura segue il formato
-     * specificato da:
-     * http://www.fatturapa.gov.it/export/fatturazione/sdi/fatturapa/v1.2.1/Rappresentazione_tabellare_del_tracciato_FatturaPA_versione_1.2.1.pdf
-     *
-     * Es 1:
-     * $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", "000000");
-     *
-     * Es 2:
-     * $builder->set("/FatturaElettronica/FatturaElettronicaBody[1]/DatiGenerali/DatiGeneraliDocumento/Numero", "1");
-     *
-     * @param string $path
-     * @param string $value
-     * @return void
-     */
-    public function set(string $path, string $value)
-    {
-        $path = $this->normalizePath($path);
-        $node = $this->retrieveNode($path, true);
-
-        if (empty($node)) {
-            $m = \sprintf("InvoiceData: Retrieved empty node for path %s", $path);
-            throw new EFattureWsClientException($m);
-        }
-
-        $node->nodeValue = \trim($value);
-    }
-
-    /**
-     * Questo metodo restituisce true se è presente un contenuto per il $path
-     * specificato, false altrimenti.
-     *
-     * @see set()
-     * @param string $path
-     * @return boolean
-     */
-    public function has(string $path)
-    {
-        if (empty($this->get($path))) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Questo metodo restituisce il contenuto presente in $path. Se non è
-     * presente nessun contenuto restituisce $default.
-     *
-     * @see set()
-     * @param string $path
-     * @param string $default
-     * @return boolean
-     */
-    public function get(string $path, string $default = null)
-    {
-        $path = $this->normalizePath($path);
-        $path = str_replace("FatturaElettronica/", "/*/", $path);
-        $nodes = $this->domXPath->query($path);
-        if ($nodes->length === 0) {
-            return $default;
-        }
-        $node = $nodes->item(0);
-        $value = \trim($node->nodeValue);
-        if (empty($value)) {
-            return $default;
-        }
-        return $value;
+        $domAttribute->value = $formato;
+        $this->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
     }
 
     public function normalize()
     {
-        // Rimove tag vuoti.
-
-        // Preso da:
-        // https://stackoverflow.com/a/21492078
-        //
-        // not(*) does not have children elements
-        // not(@*) does not have attributes
-        // text()[normalize-space()] nodes that include whitespace text
-        while (($node_list = $this->domXPath->query('//*[not(*) and not(@*) and not(text()[normalize-space()])]')) && $node_list->length) {
-            foreach ($node_list as $node) {
-                $node->parentNode->removeChild($node);
-            }
-        }
-    }
-
-    /**
-     * Restituisce l'XML della fattura come stringa.
-     *
-     * @param boolean $prettyPrint
-     * @return string
-     */
-    public function saveXML($prettyPrint = false)
-    {
-        $this->domDocument->preserveWhiteSpace = false;
-        $this->domDocument->formatOutput = false;
-
-        if ($prettyPrint) {
-            $this->domDocument->formatOutput = true;
-        }
-
-        $this->normalize();
-
-        return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
+        // Leggi il formato
+        $formato = $this->get("/FatturaElettronica/FatturaElettronicaHeader/FormatoTrasmissione", self::FATTURA_B2B);
+        $this->setFormatoTrasmissione($formato);
+        parent::normalize();
     }
 
     public function generateFileName($suffix = "_")
