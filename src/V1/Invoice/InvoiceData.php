@@ -6,6 +6,7 @@ use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\SchemaValidator;
+use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12Validator;
 
 
 class InvoiceData extends XmlWrapper
@@ -42,6 +43,12 @@ class InvoiceData extends XmlWrapper
     private function setupValidators()
     {
         $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/Schema_VFPR12.xsd"));
+        $this->addValidator(new VFPR12Validator());
+    }
+
+    public function setVersione(string $formato)
+    {
+        return $this->setFormatoTrasmissione($formato);
     }
 
     public function setFormatoTrasmissione(string $formato)
@@ -61,14 +68,7 @@ class InvoiceData extends XmlWrapper
 
         $domAttribute->value = $formato;
         $this->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
-    }
-
-    public function normalize()
-    {
-        // Leggi il formato
-        $formato = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", self::FATTURA_B2B);
-        $this->setFormatoTrasmissione($formato);
-        parent::normalize();
+        return $this;
     }
 
     public function generateFileName($suffix = "_")
@@ -134,6 +134,17 @@ class InvoiceData extends XmlWrapper
         $formatoTrasmissione = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione");
 
         return \strtoupper($formatoTrasmissione);
+    }
+
+    public function getVersione()
+    {
+        $attributes = $this->rootNode->attributes;
+        $domAttribute = $attributes->getNamedItem('versione');
+        if ($domAttribute === null) {
+            return "";
+        }
+
+        return $domAttribute->value;
     }
 
     public function getCodiceDestinatario()

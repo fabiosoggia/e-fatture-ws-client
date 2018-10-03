@@ -36,6 +36,7 @@ class XmlWrapper
     public function addValidator(XmlWrapperValidator $validator)
     {
         $this->validators[] = $validator;
+        return $this;
     }
 
     public function getDomDocument()
@@ -232,6 +233,7 @@ class XmlWrapper
         }
 
         $node->nodeValue = \trim($value);
+        return $this;
     }
 
     /**
@@ -262,7 +264,7 @@ class XmlWrapper
     public function get(string $path, string $default = null)
     {
         $path = $this->normalizePath($path);
-        $path = str_replace("FatturaElettronica/", "/*/", $path);
+        $path = str_replace($this->rootNodeTag . "/", "/*/", $path);
         $nodes = $this->domXPath->query($path);
         if ($nodes->length === 0) {
             return $default;
@@ -273,6 +275,14 @@ class XmlWrapper
             return $default;
         }
         return $value;
+    }
+
+    public function count(string $path)
+    {
+        $path = $this->normalizePath($path);
+        $path = str_replace($this->rootNodeTag . "/", "/*/", $path);
+        $nodes = $this->domXPath->query($path);
+        return $nodes->length;
     }
 
     public function normalize()
@@ -290,6 +300,7 @@ class XmlWrapper
                 $node->parentNode->removeChild($node);
             }
         }
+        return $this;
     }
 
     /**
