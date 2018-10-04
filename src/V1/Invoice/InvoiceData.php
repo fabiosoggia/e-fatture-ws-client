@@ -70,7 +70,7 @@ class InvoiceData extends XmlWrapper
         return $this;
     }
 
-    public function generateFileName($suffix = "_")
+    public function generateFileName($suffix = "")
     {
         $idPaese = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $idCodice = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
@@ -91,6 +91,10 @@ class InvoiceData extends XmlWrapper
     {
         $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+
+        if (empty($idPaese) || empty($idCodice)) {
+            return null;
+        }
 
         return $idPaese . $idCodice;
     }
@@ -140,7 +144,7 @@ class InvoiceData extends XmlWrapper
         $attributes = $this->rootNode->attributes;
         $domAttribute = $attributes->getNamedItem('versione');
         if ($domAttribute === null) {
-            return "";
+            return null;
         }
 
         return $domAttribute->value;
