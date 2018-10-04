@@ -8,9 +8,31 @@ class ErrorsEnum {
     //                          Errori di sistema                             //
     // ---------------------------------------------------------------------- //
 
+    const SYS_00001 = "SYS_00001";
+    const SYS_00001_MSG = "Errore inatteso";
+
+    const SYS_00002 = "SYS_00002";
+    const SYS_00002_MSG = "Missing request parameter";
+
+    const SYS_00003 = "SYS_00003";
+    const SYS_00003_MSG = "Invalid request parameter";
+
+    const SYS_00004 = "SYS_00004";
+    const SYS_00004_MSG = "Authentication error";
 
     // ---------------------------------------------------------------------- //
-    //                            Errori dell'SdI                             //
+    //                     Errori di trasmissione fattura                     //
+    // ---------------------------------------------------------------------- //
+
+    const FPR12_0000A = "FPR12_0000A";
+    const FPR12_0000A_MSG = "Permessi non validi per l'operazione";
+
+    const FPR12_0000B = "FPR12_0000B";
+    const FPR12_0000B_MSG = "Fattura modificata erroneamente";
+
+
+    // ---------------------------------------------------------------------- //
+    //            Errori di trasmissione fattura & Errori dell'SdI            //
     // ---------------------------------------------------------------------- //
 
     // Non gestito
@@ -204,4 +226,18 @@ class ErrorsEnum {
     // Gestito
     const FPR12_00438 = "00438";
     const FPR12_00438_MSG = "2.2.1.10.2 <Percentuale> e 2.2.1.10.3 <Importo> non presenti a fronte di 2.2.1.10.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
+
+
+    // ---------------------------------------------------------------------- //
+    //                    Errori di trasmissione notifica                     //
+    // ---------------------------------------------------------------------- //
+
+    const ES01 = "ES01";
+    const ES01_MSG = "File validato";
+
+    const ES02 = "ES02";
+    const ES02_MSG = "File validato con segnalazione";
+
+    const ES03 = "ES03";
+    const ES03_MSG = "File scartato";
 }
