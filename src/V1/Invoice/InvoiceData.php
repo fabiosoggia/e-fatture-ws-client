@@ -42,7 +42,6 @@ class InvoiceData extends XmlWrapper
 
     private function setupValidators()
     {
-        $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/Schema_VFPR12.xsd"));
         $this->addValidator(new VFPR12Validator());
     }
 
