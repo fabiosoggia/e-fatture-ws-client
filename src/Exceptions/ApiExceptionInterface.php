@@ -4,6 +4,6 @@ namespace CloudFinance\EFattureWsClient\Exceptions;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureException;
 
-class RequestException extends \GuzzleHttp\Exception\RequestException implements EFattureWsException {
+interface ApiExceptionInterface extends EFattureWsException {
 
 }

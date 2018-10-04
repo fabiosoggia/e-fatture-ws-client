@@ -2,8 +2,8 @@
 
 namespace CloudFinance\EFattureWsClient\Exceptions;
 
-use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use CloudFinance\EFattureWsClient\Exceptions\ApiRequestException;
 
-class InvalidXml extends EFattureWsClientException {
+class InvalidXml extends ApiRequestException {
 
 }

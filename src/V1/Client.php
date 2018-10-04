@@ -3,9 +3,12 @@
 namespace CloudFinance\EFattureWsClient\V1;
 
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
+use CloudFinance\EFattureWsClient\V1\Invoice\ErrorsEnum;
 use CloudFinance\EFattureWsClient\V1\Digest;
-use CloudFinance\EFattureWsClient\Exceptions\RequestException;
+use CloudFinance\EFattureWsClient\Exceptions\ApiRequestException;
+use CloudFinance\EFattureWsClient\Exceptions\ApiResponseException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use League\ISO3166\ISO3166;
@@ -152,8 +155,11 @@ class Client
             'verify' => $this->verify
         ]);
 
+        $request = null;
+        $response = null;
+
         try {
-            $request = $client->request($method, $command, $options);
+            $response = $client->request($method, $command, $options);
         } catch (TransferException $ex) {
             if (!$ex->hasResponse()) {
                 throw $ex;
@@ -161,24 +167,66 @@ class Client
 
             $request = $ex->getRequest();
             $response = $ex->getResponse();
-            $responseBody = (string) $response->getBody();
-            $responseJson = json_decode($responseBody, true);
-            $responseMessage = isset($responseJson["error"]) ?
-                $responseJson["error"] : $ex->getMessage();
+        }
 
-            if (empty($responseMessage)) {
-                throw $ex;
-            }
-
+        $responseBody = (string) $response->getBody();
+        $responseJson = json_decode($responseBody, true);
+        if ($responseJson === null) {
             throw new RequestException(
-                $responseMessage,
+                "Unable to parse response",
                 $request,
                 $response,
                 $ex
             );
         }
 
-        return $request;
+        if (!isset($responseJson["success"])) {
+            throw new RequestException(
+                "Missing 'success' attribute",
+                $request,
+                $response
+            );
+        }
+
+        $success = $responseJson["success"];
+
+        if ($success) {
+            if (!isset($responseJson["data"])) {
+                throw new RequestException(
+                    "Missing 'data' attribute",
+                    $request,
+                    $response
+                );
+            }
+
+            $responseData = $responseJson["data"];
+            return $responseData;
+        }
+
+        if (!isset($responseJson["errorCode"])) {
+            throw new RequestException(
+                "Missing 'errorCode' attribute",
+                $request,
+                $response
+            );
+        }
+        $errorCode = $responseJson["errorCode"];
+
+        if (!isset($responseJson["errorMessage"])) {
+            throw new RequestException(
+                "Missing 'errorMessage' attribute",
+                $request,
+                $response
+            );
+        }
+        $errorMessage = $responseJson["errorMessage"];
+
+        throw new ApiResponseException(
+            $errorCode,
+            $errorMessage,
+            $request,
+            $response
+        );
     }
 
     public function createDigest(array $payload)
@@ -187,6 +235,13 @@ class Client
 		return (string) $digest;
     }
 
+    /**
+     * Invia una fattura non firmata.
+     *
+     * @throws CloudFinance\EFattureWsClient\Exceptions\ApiExceptionInterface
+     * @param InvoiceData $invoice
+     * @return array
+     */
     public function sendInvoice(InvoiceData $invoice)
     {
         // Compila campi "obbligatori"
@@ -201,17 +256,16 @@ class Client
         $invoiceXml = $invoice->saveXML();
         $payload = [ "invoiceXml" => $invoiceXml ];
         $response = $this->executeHttpRequest("invoices", $payload);
-        $responseBody = (string) $response->getBody();
-
-        $responseJson = json_decode($responseBody, true);
-
-        if (empty($responseJson)) {
-            throw new EFattureWsClientException("Server responded with unparsable message: \n\n $responseBody");
-        }
-
-        return $responseJson;
+        return $response;
     }
 
+    /**
+     * Carica una fattura firmata.
+     *
+     * @throws CloudFinance\EFattureWsClient\Exceptions\ApiExceptionInterface
+     * @param SignedInvoiceReader $signedInvoiceReader
+     * @return array
+     */
     public function uploadInvoice(SignedInvoiceReader $signedInvoiceReader)
     {
         $invoice = $signedInvoiceReader->getInvoiceData();
@@ -223,7 +277,7 @@ class Client
         $signedInvoiceXml = $signedInvoiceReader->getFileSignedContent();
 
         if (\strlen($signedInvoiceXml) > 4718592) {
-            throw new InvalidInvoice("The invoice size is bigger than 5MB.");
+            throw new ApiRequestException("The invoice size is bigger than 5MB.", ErrorsEnum::FPR12_00003_MSG);
         }
 
         $payload = [
@@ -231,35 +285,41 @@ class Client
             "signedInvoiceXml" => $signedInvoiceXml
         ];
         $response = $this->executeHttpRequest("files", $payload);
-        $responseBody = (string) $response->getBody();
-
-        if (empty($responseJson)) {
-            throw new EFattureWsClientException("Server responded with unparsable message: \n\n $responseBody");
-        }
-
-        return $responseJson;
+        return $response;
     }
 
+    /**
+     * Setta i permessi di invio/ricezione fatture per un codice fiscale o
+     * partita iva.
+     *
+     * @throws CloudFinance\EFattureWsClient\Exceptions\ApiExceptionInterface
+     * @param string $kind può assumere il valore 'cf' o 'piva'
+     * @param string $idPaese codice del paese del codice
+     * @param string $codice codice fiscale o partita iva in base a quanto specificato in $kind
+     * @param boolean $receives se true (false) abilita (disabilita) la ricezione delle fatture
+     * @param boolean $transmits se true (false) abilita (disabilita) l'invio delle fatture
+     * @return array
+     */
     public function setUser(string $kind, string $idPaese, string $codice, bool $receives, bool $transmits)
     {
         $kind = \strtolower(\trim($kind));
         if (!in_array($kind, ["cf", "piva"])) {
-            throw new EFattureWsClientException("Field 'kind' must be 'cf' or 'piva'.");
+            throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva'.", ErrorsEnum::SYS_00003);
         }
 
         $idPaese = \strtoupper(\trim($idPaese));
         try {
             (new ISO3166)->alpha2($idPaese);
         } catch (\Exception $ex) {
-            throw new EFattureWsClientException("Field 'kind' is not a valid ISO3166 country code.");
+            throw new ApiRequestException("Field 'kind' is not a valid ISO3166 country code.", ErrorsEnum::SYS_00003);
         }
 
         $codice = \strtolower(\trim($codice));
         if (empty($codice)) {
-            throw new EFattureWsClientException("Field 'codice' is empty.");
+            throw new ApiRequestException("Field 'codice' is empty.", ErrorsEnum::SYS_00003);
         }
         if (strlen($codice) > 28) {
-            throw new EFattureWsClientException("Field 'codice' is longer than 28 characters.");
+            throw new ApiRequestException("Field 'codice' is longer than 28 characters.", ErrorsEnum::SYS_00003);
         }
 
         $payload = [
@@ -271,10 +331,7 @@ class Client
         ];
 
         $response = $this->executeHttpRequest("users", $payload);
-        $responseBody = (string) $response->getBody();
-        $responseJson = json_decode($responseBody, true);
-
-        return $responseJson;
+        return $response;
     }
 
     /**
@@ -297,9 +354,6 @@ class Client
         ];
 
         $response = $this->executeHttpRequest("notifications", $payload);
-        $responseBody = (string) $response->getBody();
-        $responseJson = json_decode($responseBody, true);
-
-        return $responseJson;
+        return $response;
     }
 }
