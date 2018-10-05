@@ -143,7 +143,7 @@ class XmlWrapper
         return $path;
     }
 
-    private function retrieveNode(string $path, $createIfNotExists = false)
+    public function retrieveNode(string $path, $createIfNotExists = false)
     {
         $parentNode = $this->rootNode;
         $currentPath = "/*";

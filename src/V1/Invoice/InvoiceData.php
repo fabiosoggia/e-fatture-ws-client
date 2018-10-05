@@ -41,6 +41,76 @@ class InvoiceData extends XmlWrapper
         return $instance;
     }
 
+    /**
+     * Ristruttura il tag <FatturaElettronicaHeader>.
+     *
+     * @return void
+     */
+    public function recreateHeader()
+    {
+        // Stacca la testa e sostituiscila con una completa di tutti gli elementi
+
+        // Questi sono tutti i tag di <DatiTrasmissione>.
+        $DatiTrasmissioneValues = [
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ContattiTrasmittente/Telefono" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ContattiTrasmittente/Email" => "",
+            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario" => ""
+        ];
+
+        foreach ($DatiTrasmissioneValues as $path => $v) {
+            $value = $this->get($path);
+
+            if (empty($value)) {
+                continue;
+            }
+
+            $DatiTrasmissioneValues[$path] = $value;
+        }
+
+        // Questi sono i nodi di <FatturaElettronicaHeader> che vanno preservati
+        // (se presenti) e aggiunti in coda a <DatiTrasmissione>.
+        $FatturaElettronicaHeaderOldNodes = [
+            "/FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore" => null,
+            "/FatturaElettronica/FatturaElettronicaHeader/RappresentanteFiscale" => null,
+            "/FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente" => null,
+            "/FatturaElettronica/FatturaElettronicaHeader/TerzoIntermediarioOSoggettoEmittente" => null,
+            "/FatturaElettronica/FatturaElettronicaHeader/SoggettoEmittente" => null
+        ];
+        foreach ($FatturaElettronicaHeaderOldNodes as $path => $n) {
+            $node = $this->retrieveNode($path);
+            $FatturaElettronicaHeaderOldNodes[$path] = $node;
+        }
+
+        $FatturaElettronicaHeaderOldNode = $this->retrieveNode("/FatturaElettronica/FatturaElettronicaHeader");
+        $FatturaElettronicaHeaderNewNode = $this->domDocument->createElement("FatturaElettronicaHeader");
+        $res = $this->rootNode->replaceChild($FatturaElettronicaHeaderNewNode, $FatturaElettronicaHeaderOldNode);
+        if ($res === false) {
+            throw new InvalidInvoice("Unable to replace header");
+        }
+
+        foreach ($DatiTrasmissioneValues as $path => $value) {
+            $this->set($path, $value);
+        }
+
+        foreach ($FatturaElettronicaHeaderOldNodes as $path => $node) {
+            if ($node === null) {
+                continue;
+            }
+            $FatturaElettronicaHeaderNewNode->appendChild($node);
+        }
+    }
+
+    public function normalize()
+    {
+        $this->recreateHeader();
+        parent::normalize();
+    }
+
     private function setupValidators()
     {
         $this->addValidator(new VFPR12CommonValidator());
