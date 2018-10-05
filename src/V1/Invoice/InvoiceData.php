@@ -4,6 +4,7 @@ namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
+use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonValidator;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
@@ -33,7 +34,7 @@ class InvoiceData extends XmlWrapper
             $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
         } catch (\Exception $ex) {
             $error = sprintf("Invalid invoice XML: %s.", $ex->getMessage());
-            throw new InvalidInvoice($error, $ex->getCode());
+            throw new InvalidXml($error, $ex->getCode());
         }
         $instance = new self($domDocument);
         $instance->setupValidators();
