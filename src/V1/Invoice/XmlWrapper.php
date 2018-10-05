@@ -33,6 +33,12 @@ class XmlWrapper
         }
     }
 
+    public function clone()
+    {
+        $self = new self($this->domDocument);
+        return $self;
+    }
+
     public function addValidator(XmlWrapperValidator $validator)
     {
         $this->validators[] = $validator;
