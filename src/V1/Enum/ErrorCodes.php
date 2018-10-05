@@ -1,8 +1,8 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient\V1\Invoice;
+namespace CloudFinance\EFattureWsClient\V1\Enum;
 
-class ErrorsEnum {
+class ErrorCodes {
 
     // ---------------------------------------------------------------------- //
     //                          Errori di sistema                             //

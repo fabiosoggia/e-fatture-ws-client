@@ -1,8 +1,8 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient\V1\Invoice;
+namespace CloudFinance\EFattureWsClient\V1\Enum;
 
-class SdiNotificationEnum {
+class SdiNotifications {
     public const RICEVUTA_CONSEGNA = "RicevutaConsegna";
     public const NOTIFICA_MANCATA_CONSEGNA = "NotificaMancataConsegna";
     public const NOTIFICA_SCARTO = "NotificaScarto";

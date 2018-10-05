@@ -5,7 +5,7 @@ namespace CloudFinance\EFattureWsClient\V1\Invoice;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonValidator;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
 

@@ -2,11 +2,11 @@
 
 namespace CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\ErrorsEnum;
+use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidator;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
-use \DateTime;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
+use DateTime;
 
 class VFPR12CommonValidator implements XmlWrapperValidator {
 
@@ -22,7 +22,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         $fileSize = strlen($xmlWrapper->saveXML());
         if ($fileSize > 5242880) {
             // 5 megabyte
-            $errors[ErrorsEnum::FPR12_00003] = "Le dimensioni del file superano quelle ammesse";
+            $errors[ErrorCodes::FPR12_00003] = "Le dimensioni del file superano quelle ammesse";
             return $errors;
         }
 
@@ -49,12 +49,12 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         if ($nativeErrorsCount > 50) {
             // 00201: Riscontrati più di 50 errori di formato
             $message = $nativeErrors[0]->message;
-            $errors[ErrorsEnum::FPR12_00201] = "Riscontrati più di 50 errori di formato ($message)";
+            $errors[ErrorCodes::FPR12_00201] = "Riscontrati più di 50 errori di formato ($message)";
             return $errors;
         } elseif ($nativeErrorsCount > 0) {
             // 00200: File non conforme al formato
             $message = $nativeErrors[0]->message;
-            $errors[ErrorsEnum::FPR12_00200] = "File non conforme al formato ($message)";
+            $errors[ErrorCodes::FPR12_00200] = "File non conforme al formato ($message)";
             return $errors;
         }
 
@@ -79,12 +79,12 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Natura");
                 if ($AliquotaIVA === "0.00") {
                     if (empty($Natura)) {
-                        $errors[ErrorsEnum::FPR12_00400] = "2.2.1.14 <Natura> non presente a fronte di 2.2.1.12 <AliquotaIVA> pari a zero";
+                        $errors[ErrorCodes::FPR12_00400] = "2.2.1.14 <Natura> non presente a fronte di 2.2.1.12 <AliquotaIVA> pari a zero";
                     }
                 }
                 if (!empty($Natura)) {
                     if ($AliquotaIVA !== "0.00") {
-                        $errors[ErrorsEnum::FPR12_00401] = "2.2.1.14 <Natura> presente a fronte di 2.2.1.12 <AliquotaIVA> diversa da zero";
+                        $errors[ErrorCodes::FPR12_00401] = "2.2.1.14 <Natura> presente a fronte di 2.2.1.12 <AliquotaIVA> diversa da zero";
                     }
                 }
             }
@@ -109,13 +109,13 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
             for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
                 $Ritenuta = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Ritenuta");
                 if (($Ritenuta === "SI") && ($DatiRitenutaCount === 0)) {
-                    $errors[ErrorsEnum::FPR12_00411] = "2.1.1.5 <DatiRitenuta> non presente a fronte di almeno un blocco 2.2.1 <DettaglioLinee> con 2.2.1.13 <Ritenuta> uguale a SI";
+                    $errors[ErrorCodes::FPR12_00411] = "2.1.1.5 <DatiRitenuta> non presente a fronte di almeno un blocco 2.2.1 <DettaglioLinee> con 2.2.1.13 <Ritenuta> uguale a SI";
                 }
             }
 
             $Ritenuta = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale/Ritenuta");
             if (($Ritenuta === "SI") && ($DatiRitenutaCount === 0)) {
-                $errors[ErrorsEnum::FPR12_00415] = "2.1.1.5 <DatiRitenuta> non presente a fronte di 2.1.1.7.6 <Ritenuta> uguale a SI";
+                $errors[ErrorCodes::FPR12_00415] = "2.1.1.5 <DatiRitenuta> non presente a fronte di 2.1.1.7.6 <Ritenuta> uguale a SI";
             }
         }
 
@@ -133,12 +133,12 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
 
                 if ($AliquotaIVA === "0.00") {
                     if (empty($Natura)) {
-                        $errors[ErrorsEnum::FPR12_00413] = "2.1.1.7.7 <Natura> non presente a fronte di 2.1.1.7.5 <AliquotaIVA> pari a zero";
+                        $errors[ErrorCodes::FPR12_00413] = "2.1.1.7.7 <Natura> non presente a fronte di 2.1.1.7.5 <AliquotaIVA> pari a zero";
                     }
                 }
                 if (!empty($Natura)) {
                     if ($AliquotaIVA !== "0.00") {
-                        $errors[ErrorsEnum::FPR12_00414] = "2.1.1.7.7 <Natura> presente a fronte di 2.1.1.7.5 <Aliquota IVA> diversa da zero";
+                        $errors[ErrorCodes::FPR12_00414] = "2.1.1.7.7 <Natura> presente a fronte di 2.1.1.7.5 <Aliquota IVA> diversa da zero";
                     }
                 }
             }
@@ -154,7 +154,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         $IdFiscaleIVACount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA");
         $CodiceFiscaleCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/CodiceFiscale");
         if (($IdFiscaleIVACount === 0) && ($CodiceFiscaleCount === 0)) {
-            $errors[ErrorsEnum::FPR12_00417] = "1.4.1.1 <IdFiscaleIVA> e 1.4.1.2 <CodiceFiscale> non valorizzati";
+            $errors[ErrorCodes::FPR12_00417] = "1.4.1.1 <IdFiscaleIVA> e 1.4.1.2 <CodiceFiscale> non valorizzati";
         }
 
         // Codice: 00418
@@ -173,7 +173,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $Data2 = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiFattureCollegate[$j]/Data");
                 $Data2DT = DateTime::createFromFormat("Y-m-d", $Data2);
                 if ($Data1DT < $Data2DT) {
-                    $errors[ErrorsEnum::FPR12_00418] = "2.1.1.3 <Data> antecedente a 2.1.6.3 <Data>";
+                    $errors[ErrorCodes::FPR12_00418] = "2.1.1.3 <Data> antecedente a 2.1.6.3 <Data>";
                 }
             }
         }
@@ -205,7 +205,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 if (in_array($AliquotaIVA, $AliquoteIVAInDatiRiepilogo)) {
                     continue;
                 }
-                $errors[ErrorsEnum::FPR12_00419] = "2.2.2 <DatiRiepilogo> non presente in corrispondenza di almeno un valore di 2.1.1.7.5 <AliquotaIVA> (per ogni aliquota IVA presente in fattura deve esistere il corrispondente blocco di <DatiRiepilogo>)";
+                $errors[ErrorCodes::FPR12_00419] = "2.2.2 <DatiRiepilogo> non presente in corrispondenza di almeno un valore di 2.1.1.7.5 <AliquotaIVA> (per ogni aliquota IVA presente in fattura deve esistere il corrispondente blocco di <DatiRiepilogo>)";
                 break;
             }
 
@@ -218,7 +218,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 if (in_array($AliquotaIVA, $AliquoteIVAInDatiRiepilogo)) {
                     continue;
                 }
-                $errors[ErrorsEnum::FPR12_00419] = "2.2.2 <DatiRiepilogo> non presente in corrispondenza di almeno un valore di 2.2.1.12 <AliquotaIVA> (per ogni aliquota IVA presente in fattura deve esistere il corrispondente blocco di <DatiRiepilogo>)";
+                $errors[ErrorCodes::FPR12_00419] = "2.2.2 <DatiRiepilogo> non presente in corrispondenza di almeno un valore di 2.2.1.12 <AliquotaIVA> (per ogni aliquota IVA presente in fattura deve esistere il corrispondente blocco di <DatiRiepilogo>)";
                 break;
             }
         }
@@ -238,7 +238,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Natura");
                 $EsigibilitaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/EsigibilitaIVA");
                 if (($Natura === "N6") && ($EsigibilitaIVA === "S")) {
-                    $errors[ErrorsEnum::FPR12_00420] = "2.2.2.2 <Natura> con valore N6 (inversione contabile) a fronte di 2.2.2.7 <EsigibilitaIVA> uguale a S (scissione pagamenti) (il regime di scissione pagamenti non è compatibile con quello di inversione contabile – reverse charge)";
+                    $errors[ErrorCodes::FPR12_00420] = "2.2.2.2 <Natura> con valore N6 (inversione contabile) a fronte di 2.2.2.7 <EsigibilitaIVA> uguale a S (scissione pagamenti) (il regime di scissione pagamenti non è compatibile con quello di inversione contabile – reverse charge)";
                 }
             }
         }
@@ -269,7 +269,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $diff = round(abs($ImpostaExpected - $Imposta), 2);
 
                 if ($diff > 0.01) {
-                    $errors[ErrorsEnum::FPR12_00421] = "2.2.2.6 <Imposta> [$Imposta] non calcolato secondo le regole definite nelle specifiche tecniche (il valore dell'elemento <Imposta> deve essere uguale al risultato della seguente operazione: ( AliquotaIVA * ImponibileImporto ) ⁄ 100 ) [ ( $AliquotaIVA * $ImponibileImporto ) ⁄ 100 ) ] il risultato di questa operazione va arrotondato alla seconda cifra decimale, per difetto se la terza cifra decimale è inferiore a 5, per eccesso se uguale o superiore a 5; è ammessa la tolleranza di ±1 centesimo di euro)";
+                    $errors[ErrorCodes::FPR12_00421] = "2.2.2.6 <Imposta> [$Imposta] non calcolato secondo le regole definite nelle specifiche tecniche (il valore dell'elemento <Imposta> deve essere uguale al risultato della seguente operazione: ( AliquotaIVA * ImponibileImporto ) ⁄ 100 ) [ ( $AliquotaIVA * $ImponibileImporto ) ⁄ 100 ) ] il risultato di questa operazione va arrotondato alla seconda cifra decimale, per difetto se la terza cifra decimale è inferiore a 5, per eccesso se uguale o superiore a 5; è ammessa la tolleranza di ±1 centesimo di euro)";
                 }
             }
         }
@@ -334,7 +334,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
 
 
                 if ($diff > 0.01) {
-                    $errors[ErrorsEnum::FPR12_00422] = "2.2.2.5 <ImponibileImporto> non calcolato secondo le regole definite nelle specifiche tecniche";
+                    $errors[ErrorCodes::FPR12_00422] = "2.2.2.5 <ImponibileImporto> non calcolato secondo le regole definite nelle specifiche tecniche";
                 }
             }
         }
@@ -382,7 +382,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $PrezzoTotaleExpected = ($PrezzoUnitario + $ScontoMaggiorazioneImporto) * $Quantita;
                 $PrezzoTotaleExpected = \round($PrezzoTotaleExpected, 2);
                 if (abs($PrezzoTotaleExpected - $PrezzoTotale) > 0.01) {
-                    $errors[ErrorsEnum::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche";
+                    $errors[ErrorCodes::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche";
                 }
             }
         }
@@ -406,7 +406,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
             $Numero = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/Numero");
             $res = preg_match('/\d/', $Numero);
             if ($res !== 1) {
-                $errors[ErrorsEnum::FPR12_00425] = "2.1.1.4 <Numero> non contenente caratteri numerici (il numero della fattura deve contenere almeno un carattere numerico)";
+                $errors[ErrorCodes::FPR12_00425] = "2.1.1.4 <Numero> non contenente caratteri numerici (il numero della fattura deve contenere almeno un carattere numerico)";
             }
         }
 
@@ -420,10 +420,10 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         $FormatoTrasmissione = \strtoupper($FormatoTrasmissione);
         $CodiceDestinatario = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario");
         if (($FormatoTrasmissione === "FPA12") && (\strlen($CodiceDestinatario) === 7)) {
-            $errors[ErrorsEnum::FPR12_00427] = "1.1.4 <CodiceDestinatario> di 7 caratteri a fronte di 1.1.3 <FormatoTrasmissione> con valore FPA12";
+            $errors[ErrorCodes::FPR12_00427] = "1.1.4 <CodiceDestinatario> di 7 caratteri a fronte di 1.1.3 <FormatoTrasmissione> con valore FPA12";
         }
         if (($FormatoTrasmissione === "FPR12") && (\strlen($CodiceDestinatario) === 6)) {
-            $errors[ErrorsEnum::FPR12_00427] = "1.1.4 <CodiceDestinatario> di 6 caratteri a fronte di 1.1.3 <FormatoTrasmissione> con valore FPR12";
+            $errors[ErrorCodes::FPR12_00427] = "1.1.4 <CodiceDestinatario> di 6 caratteri a fronte di 1.1.3 <FormatoTrasmissione> con valore FPR12";
         }
 
 
@@ -433,11 +433,11 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         // (vale sia per le fatture ordinarie che per le semplificate)
         $FormatoTrasmissione = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione");
         if (($FormatoTrasmissione !== "FPA12") && ($FormatoTrasmissione !== "FPR12")) {
-            $errors[ErrorsEnum::FPR12_00428] = "1.1.3 <FormatoTrasmissione> con valore diverso da FPA12 e FPR12";
+            $errors[ErrorCodes::FPR12_00428] = "1.1.3 <FormatoTrasmissione> con valore diverso da FPA12 e FPR12";
         }
         $versione = $xmlWrapper->getAttribute("/FatturaElettronica", "versione");
         if ($versione !== $FormatoTrasmissione) {
-            $errors[ErrorsEnum::FPR12_00428] = "1.1.3 <FormatoTrasmissione> non coerente con il valore dell'attributo VERSION";
+            $errors[ErrorCodes::FPR12_00428] = "1.1.3 <FormatoTrasmissione> non coerente con il valore dell'attributo VERSION";
         }
 
         // Codice: 00429
@@ -452,10 +452,10 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/AliquotaIVA");
                 $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Natura");
                 if (($AliquotaIVA === "0.00") && empty($Natura)) {
-                    $errors[ErrorsEnum::FPR12_00429] = "2.2.2.2 <Natura> non presente a fronte di 2.2.2.1 <AliquotaIVA> pari a zero (nei <DatiRiepilogo>, l'indicazione di un'aliquota IVA pari a zero obbliga all'indicazione della natura che giustifichi la non imponibilità)";
+                    $errors[ErrorCodes::FPR12_00429] = "2.2.2.2 <Natura> non presente a fronte di 2.2.2.1 <AliquotaIVA> pari a zero (nei <DatiRiepilogo>, l'indicazione di un'aliquota IVA pari a zero obbliga all'indicazione della natura che giustifichi la non imponibilità)";
                 }
                 if (($AliquotaIVA !== "0.00") && !empty($Natura)) {
-                    $errors[ErrorsEnum::FPR12_00430] = "2.2.2.2 <Natura> presente a fronte di 2.2.2.1 <AliquotaIVA> diversa da zero (l'indicazione di un'aliquota IVA diversa da zero qualifica i dati di riepilogo come dati riferiti ad operazioni imponibili e quindi non è ammessa la presenza dell'elemento <Natura>)";
+                    $errors[ErrorCodes::FPR12_00430] = "2.2.2.2 <Natura> presente a fronte di 2.2.2.1 <AliquotaIVA> diversa da zero (l'indicazione di un'aliquota IVA diversa da zero qualifica i dati di riepilogo come dati riferiti ad operazioni imponibili e quindi non è ammessa la presenza dell'elemento <Natura>)";
                 }
             }
         }
@@ -475,7 +475,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $Importo = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/ScontoMaggiorazione[$j]/Importo");
                 if (!empty($Tipo)) {
                     if (empty($Percentuale) && empty($Importo)) {
-                        $errors[ErrorsEnum::FPR12_00437] = "2.1.1.8.2 <Percentuale> e 2.1.1.8.3 <Importo> non presenti a fronte di 2.1.1.8.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
+                        $errors[ErrorCodes::FPR12_00437] = "2.1.1.8.2 <Percentuale> e 2.1.1.8.3 <Importo> non presenti a fronte di 2.1.1.8.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
                     }
                 }
             }
@@ -498,7 +498,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                     $Importo = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/ScontoMaggiorazione[$k]/Importo");
                     if (!empty($Tipo)) {
                         if (empty($Percentuale) && empty($Importo)) {
-                            $errors[ErrorsEnum::FPR12_00438] = "2.2.1.10.2 <Percentuale> e 2.2.1.10.3 <Importo> non presenti a fronte di 2.2.1.10.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
+                            $errors[ErrorCodes::FPR12_00438] = "2.2.1.10.2 <Percentuale> e 2.2.1.10.3 <Importo> non presenti a fronte di 2.2.1.10.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
                         }
                     }
                 }

@@ -2,12 +2,12 @@
 
 namespace CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\ErrorsEnum;
+use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidator;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
-use \DateTime;
-use \DateTimeZone;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
+use DateTime;
+use DateTimeZone;
 
 class VFPR12DatesValidator implements XmlWrapperValidator {
 
@@ -47,13 +47,13 @@ class VFPR12DatesValidator implements XmlWrapperValidator {
             $DataElements = explode("-", $Data);
 
             if ($DataElements[0] > $this->year) {
-                $errors[ErrorsEnum::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-MM-DD)";
+                $errors[ErrorCodes::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-MM-DD)";
             } else if ($DataElements[0] == $this->year) {
                 if ($DataElements[1] > $this->month) {
-                    $errors[ErrorsEnum::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-$this->month-DD)";
+                    $errors[ErrorCodes::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-$this->month-DD)";
                 } else if ($DataElements[1] == $this->month) {
                     if ($DataElements[2] > $this->day) {
-                        $errors[ErrorsEnum::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-$this->month-$this->day)";
+                        $errors[ErrorCodes::FPR12_00403] = "2.1.1.3 <Data> successiva alla data di ricezione ($Data > $this->year-$this->month-$this->day)";
                     }
                 }
             }

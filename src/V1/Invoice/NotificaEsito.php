@@ -3,8 +3,8 @@
 namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\SchemaValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators\SchemaValidator;
 
 class NotificaEsito extends XmlWrapper
 {

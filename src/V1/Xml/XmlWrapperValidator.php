@@ -1,8 +1,8 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient\V1\Invoice;
+namespace CloudFinance\EFattureWsClient\V1\Xml;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 
 interface XmlWrapperValidator {
 

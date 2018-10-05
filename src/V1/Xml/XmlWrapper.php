@@ -1,13 +1,13 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient\V1\Invoice;
+namespace CloudFinance\EFattureWsClient\V1\Xml;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoiceParameter;
 use CloudFinance\EFattureWsClient\Iso3166;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidator;
 use \DOMDocument;
 use \DOMXPath;
 

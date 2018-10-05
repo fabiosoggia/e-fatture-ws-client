@@ -1,9 +1,9 @@
 <?php
 
-namespace CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators;
+namespace CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidator;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 
 class SchemaValidator implements XmlWrapperValidator {
 

@@ -2,17 +2,17 @@
 
 namespace CloudFinance\EFattureWsClient\V1;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
-use CloudFinance\EFattureWsClient\V1\Invoice\ErrorsEnum;
-use CloudFinance\EFattureWsClient\V1\Digest;
 use CloudFinance\EFattureWsClient\Exceptions\ApiRequestException;
 use CloudFinance\EFattureWsClient\Exceptions\ApiResponseException;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use CloudFinance\EFattureWsClient\V1\Digest;
+use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
+use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
+use CloudFinance\EFattureWsClient\V1\Invoice\NotificaEsito;
+use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
-use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use League\ISO3166\ISO3166;
-use CloudFinance\EFattureWsClient\V1\Invoice\NotificaEsito;
 
 class Client
 {
@@ -23,78 +23,6 @@ class Client
     public $endpoint = "http://localhost/eFATTURE-ws/public/api/v1/";
     public $timeout = 5.0;
     public $verify = true;
-
-    /**
-     * Questi messaggi le risposte ricevute dal ws dal sdi quando sono inviate
-     * le fatture/notifiche.
-     */
-    public const WEBHOOK_KIND_API_INVIO_FATTURA = "webhook_kind_api_invio_fattura";
-    public const WEBHOOK_KIND_API_INVIO_NOTIFICA = "webhook_kind_api_invio_notifica";
-
-
-    /**
-     * È il file inviato dal SdI al soggetto ricevente insieme al file fattura e
-     * contenente i dati principali di riferimento del file utili per
-     * l’elaborazione, ivi compreso l’identificativo del SdI.
-     */
-    public const WEBHOOK_KIND_SDI_RICEVI_FATTURA = "riceviFatture";
-
-
-    /**
-     * È la notifica inviata dal SdI al soggetto trasmittente nei casi in cui
-     * non sia stato superato uno o più controlli tra quelli effettuati dal SdI
-     * sul file ricevuto.
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO = "notificaScarto";
-
-
-    /**
-     * È la notifica inviata dal SdI al soggetto trasmittente per attestare
-     * l’avvenuta ricezione della fattura e l’impossibilità di recapitare il
-     * file al destinatario; la casistica si riferisce:
-     *  - alla presenza del codice destinatario valorizzato a “999999” e
-     *    all’impossibilità di identificare univocamente nell’anagrafica di
-     *    riferimento, IPA, un ufficio di fatturazione elettronica associato al
-     *    codice fiscale corrispondente all’identificativo fiscale del
-     *    cessionario\committente riportato in fattura;
-     *  - alla mancata disponibilità tecnica di comunicazione con il destinatario.
-     */
-    // public const WEBHOOK_KIND_SDI_TRASMISSIONE_SENZA_RECAPITO_FATTURA = "notificaMancataConsegna";
-
-
-    /**
-     * È la ricevuta inviata dal SdI al soggetto trasmittente per comunicare
-     * l’avvenuta consegna del file al destinatario.
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_RICEVUTA_CONSEGNA = "ricevutaConsegna";
-    /**
-     * È la notifica inviata dal SdI al soggetto trasmittente nei casi in cui
-     * fallisca l’operazione di consegna del file al destinatario.
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_MANCATA_CONSEGNA = "notificaMancataConsegna";
-
-
-    /**
-     * È la notifica inviata dal SdI al soggetto trasmittente per comunicare
-     * l’esito (accettazione o rifiuto della fattura) dei controlli effettuati
-     * sul documento ricevuto dal destinatario.
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_ESITO = "notificaEsito";
-    /**
-     * È la notifica inviata dal SdI al soggetto ricevente per comunicare
-     * eventuali incoerenze o errori nell’esito inviato al SdI precedentemente
-     * (accettazione o rifiuto della fattura).
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_SCARTO_ESITO = "notificaScarto";
-
-
-    /**
-     * È la notifica inviata dal SdI sia al soggetto trasmittente che al
-     * soggetto ricevente per comunicare la decorrenza del termine limite per
-     * la comunicazione dell’accettazione/rifiuto.
-     */
-    public const WEBHOOK_KIND_SDI_NOTIFICA_DECORRENZA_TERMINI = "notificaDecorrenzaTermini";
-
 
     public function setUuid(string $uuid)
     {
@@ -277,7 +205,7 @@ class Client
         $signedInvoiceXml = $signedInvoiceReader->getFileSignedContent();
 
         if (\strlen($signedInvoiceXml) > 4718592) {
-            throw new ApiRequestException("The invoice size is bigger than 5MB.", ErrorsEnum::FPR12_00003_MSG);
+            throw new ApiRequestException("The invoice size is bigger than 5MB.", ErrorCodes::FPR12_00003_MSG);
         }
 
         $payload = [
@@ -304,22 +232,22 @@ class Client
     {
         $kind = \strtolower(\trim($kind));
         if (!in_array($kind, ["cf", "piva"])) {
-            throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva'.", ErrorsEnum::SYS_00003);
+            throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva'.", ErrorCodes::SYS_00003);
         }
 
         $idPaese = \strtoupper(\trim($idPaese));
         try {
             (new ISO3166)->alpha2($idPaese);
         } catch (\Exception $ex) {
-            throw new ApiRequestException("Field 'kind' is not a valid ISO3166 country code.", ErrorsEnum::SYS_00003);
+            throw new ApiRequestException("Field 'kind' is not a valid ISO3166 country code.", ErrorCodes::SYS_00003);
         }
 
         $codice = \strtolower(\trim($codice));
         if (empty($codice)) {
-            throw new ApiRequestException("Field 'codice' is empty.", ErrorsEnum::SYS_00003);
+            throw new ApiRequestException("Field 'codice' is empty.", ErrorCodes::SYS_00003);
         }
         if (strlen($codice) > 28) {
-            throw new ApiRequestException("Field 'codice' is longer than 28 characters.", ErrorsEnum::SYS_00003);
+            throw new ApiRequestException("Field 'codice' is longer than 28 characters.", ErrorCodes::SYS_00003);
         }
 
         $payload = [

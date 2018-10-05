@@ -2,8 +2,8 @@
 
 namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
-use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 
 class SignedInvoiceReader
 {
