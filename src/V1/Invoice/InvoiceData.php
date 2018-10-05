@@ -5,8 +5,8 @@ namespace CloudFinance\EFattureWsClient\V1\Invoice;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\SchemaValidator;
-use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12Validator;
+use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonValidator;
+use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
 
 
 class InvoiceData extends XmlWrapper
@@ -42,7 +42,8 @@ class InvoiceData extends XmlWrapper
 
     private function setupValidators()
     {
-        $this->addValidator(new VFPR12Validator());
+        $this->addValidator(new VFPR12CommonValidator());
+        $this->addValidator(new VFPR12DatesValidator());
     }
 
     public function setVersione(string $formato)

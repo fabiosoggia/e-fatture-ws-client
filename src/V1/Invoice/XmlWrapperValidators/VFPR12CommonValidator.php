@@ -8,7 +8,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidator;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapper;
 use \DateTime;
 
-class VFPR12Validator implements XmlWrapperValidator {
+class VFPR12CommonValidator implements XmlWrapperValidator {
 
     public function getErrors(XmlWrapper $xmlWrapper)
     {
