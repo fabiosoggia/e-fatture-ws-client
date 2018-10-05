@@ -24,4 +24,29 @@ class WebhookMessages {
      */
     public const WEBHOOK_RICEVI_NOTIFICA = "webhook_ricevi_notifica";
 
+    public static function serializeMessage($params)
+    {
+        $params = (array) $params;
+        foreach ($params as $key => $value) {
+            $params[$key] = base64_encode($value);
+        }
+        $json = json_encode($params);
+        if ($json === false) {
+            throw new \Exception("Can't serialize message params");
+        }
+        return $json;
+    }
+
+    public static function unserializeMessage(string $message)
+    {
+        $params = json_decode($message, true);
+        if ($params === false) {
+            throw new \Exception("Can't unserialize message params");
+        }
+        foreach ($params as $key => $value) {
+            $params[$key] = base64_decode($value);
+        }
+        return $params;
+    }
+
 }
