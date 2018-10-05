@@ -129,15 +129,7 @@ class InvoiceData extends XmlWrapper
             throw new InvalidInvoice("Formato must be 'FPA12' or 'FPR12'.");
         }
 
-        $attributes = $this->rootNode->attributes;
-        $domAttribute = $attributes->getNamedItem('versione');
-
-        if ($domAttribute === null) {
-            $domAttribute = $this->domDocument->createAttribute('versione');
-            $this->rootNode->appendChild($domAttribute);
-        }
-
-        $domAttribute->value = $formato;
+        $this->setAttribute("/FatturaElettronica", "versione", $formato);
         $this->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
         return $this;
     }
@@ -213,13 +205,7 @@ class InvoiceData extends XmlWrapper
 
     public function getVersione()
     {
-        $attributes = $this->rootNode->attributes;
-        $domAttribute = $attributes->getNamedItem('versione');
-        if ($domAttribute === null) {
-            return null;
-        }
-
-        return $domAttribute->value;
+        return $this->getAttribute("/FatturaElettronica", "versione");
     }
 
     public function getCodiceDestinatario()

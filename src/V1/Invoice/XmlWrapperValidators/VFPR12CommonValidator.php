@@ -435,7 +435,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         if (($FormatoTrasmissione !== "FPA12") && ($FormatoTrasmissione !== "FPR12")) {
             $errors[ErrorsEnum::FPR12_00428] = "1.1.3 <FormatoTrasmissione> con valore diverso da FPA12 e FPR12";
         }
-        $versione = $xmlWrapper->getVersione();
+        $versione = $xmlWrapper->getAttribute("/FatturaElettronica", "versione");
         if ($versione !== $FormatoTrasmissione) {
             $errors[ErrorsEnum::FPR12_00428] = "1.1.3 <FormatoTrasmissione> non coerente con il valore dell'attributo VERSION";
         }

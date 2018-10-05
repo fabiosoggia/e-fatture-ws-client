@@ -328,4 +328,37 @@ class XmlWrapper
 
         return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
     }
+
+    public function retrieveAttributeNode(string $path, string $attribute, $createIfNotExists = false)
+    {
+        $node = $this->retrieveNode($path, $createIfNotExists);
+        $attributes = $node->attributes;
+        $domAttribute = $attributes->getNamedItem($attribute);
+
+        if ($domAttribute === null) {
+            if ($createIfNotExists === false) {
+                return null;
+            }
+
+            $domAttribute = $this->domDocument->createAttribute($attribute);
+        }
+        $node->appendChild($domAttribute);
+        return $domAttribute;
+    }
+
+    public function setAttribute(string $path, string $attribute, string $value)
+    {
+        $domAttribute = $this->retrieveAttributeNode($path, $attribute, true);
+        $domAttribute->value = $value;
+        return $this;
+    }
+
+    public function getAttribute(string $path, string $attribute, string $default = null)
+    {
+        $domAttribute = $this->retrieveAttributeNode($path, $attribute, false);
+        if ($domAttribute === null) {
+            return $default;
+        }
+        return $domAttribute->value;
+    }
 }
