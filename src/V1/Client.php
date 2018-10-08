@@ -13,6 +13,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\TransferException;
 use League\ISO3166\ISO3166;
+use CloudFinance\EFattureWsClient\V1\Enum\WebhookMessages;
 
 class Client
 {
@@ -34,48 +35,56 @@ class Client
         $this->privateKey = $privateKey;
     }
 
-    public function parse($efSignature, $efPayload)
+    public function parse($fiRequest)
     {
-        if (empty($efSignature)) {
-            throw new \InvalidArgumentException("Parameter 'efSignature' can't be empty.");
-        }
-        if (empty($efPayload)) {
-            throw new \InvalidArgumentException("Parameter 'efPayload' can't be empty.");
+        if (empty($fiRequest)) {
+            throw new \InvalidArgumentException("Parameter 'fiRequest' can't be empty.");
         }
 
+        $efPayload = $fiRequest["payload"];
         $digest = new Digest($this->uuid, $this->privateKey, $efPayload);
         if (!$digest->verify($efSignature)) {
             throw new \InvalidArgumentException("Mismatching signature.");
         }
 
         $data = [];
-        $data["webhookKind"] = __::get($efPayload, "webhookKind");
-        $data["sdiInvoiceFileId"] = intval(__::get($efPayload, "sdiInvoiceFileId"));
+        $data['webhookMessage'] = $efPayload["webhookMessage"];
+        $data['sdiNotification'] = $efPayload["sdiNotification"];
+        $data['sdiInvoiceFileId'] = intval($efPayload["sdiInvoiceFileId"]);
+        $data['sdiNotificationFileId'] = intval($efPayload["sdiNotificationFileId"]);
 
         if ($data["sdiInvoiceFileId"] <= 0) {
             throw new EFattureWsClientException("Invalid payload received.");
         }
 
-        $sdiNotificationFileId = intval(__::get($efPayload, "sdiInvoiceFileId"));
-        if ($sdiNotificationFileId > 0) {
-            $data["sdiNotificationFileId"] = $sdiNotificationFileId;
-        }
+        $data['content'] = $efPayload["content"];
+        $data['content'] = WebhookMessages::unserializeMessage($data["content"]);
 
         return (object) $data;
     }
 
-    public function executeHttpRequest($command, array $payload)
+    public function buildRequestArray(array $data)
     {
-        $method = \strtoupper($this->method);
-        $command = \strtolower($command);
         $apiUuid = $this->uuid;
+        $payload = $data;
         $fingerprint = $this->createDigest($payload);
-        $options = [
-            'form_params' => [
+
+        return [
+            "_fiRequest" => [
                 'apiUuid' => $apiUuid,
                 'fingerprint' => $fingerprint,
                 'payload' => $payload
             ]
+        ];
+    }
+
+    public function executeHttpRequest($command, array $data)
+    {
+        $method = \strtoupper($this->method);
+        $command = \strtolower($command);
+        $apiUuid = $this->uuid;
+        $options = [
+            'form_params' => $this->buildRequestArray($data)
         ];
         $client = new \GuzzleHttp\Client([
             'base_uri' => $this->endpoint,
