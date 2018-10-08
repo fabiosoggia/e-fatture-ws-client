@@ -103,8 +103,7 @@ class Client
             throw new RequestException(
                 "Unable to parse response",
                 $request,
-                $response,
-                $ex
+                $response
             );
         }
 
