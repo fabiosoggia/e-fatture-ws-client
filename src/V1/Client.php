@@ -25,12 +25,12 @@ class Client
     public $timeout = 5.0;
     public $verify = true;
 
-    public function setUuid(string $uuid)
+    public function setUuid($uuid)
     {
         $this->uuid = $uuid;
     }
 
-    public function setPrivateKey(string $privateKey)
+    public function setPrivateKey($privateKey)
     {
         $this->privateKey = $privateKey;
     }
@@ -42,6 +42,7 @@ class Client
         }
 
         $efPayload = $fiRequest["payload"];
+        $efSignature = $fiRequest["fingerprint"];
         $digest = new Digest($this->uuid, $this->privateKey, $efPayload);
         if (!$digest->verify($efSignature)) {
             throw new \InvalidArgumentException("Mismatching signature.");

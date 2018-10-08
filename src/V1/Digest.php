@@ -6,11 +6,11 @@ class Digest
 {
     private $digest;
 
-    public function __construct(string $uuid, string $privateKey, $payload) {
+    public function __construct($uuid, $privateKey, $payload) {
         $this->digest = self::create($uuid, $privateKey, $payload);
     }
 
-    public static function create(string $uuid, string $privateKey, $payload)
+    public static function create($uuid, $privateKey, $payload)
     {
         if (\is_array($payload)) {
             \ksort($payload);
@@ -20,9 +20,12 @@ class Digest
         return $digest;
     }
 
-    public function verify(string $digest)
+    public function verify($digest)
     {
-        return \hash_equals($this->digest, $digest);
+        if (function_exists("hash_equals")) {
+            return \hash_equals($this->digest, $digest);
+        }
+        return $this->digest === $digest;
     }
 
     public function __toString()
