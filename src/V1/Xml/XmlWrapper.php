@@ -329,6 +329,11 @@ class XmlWrapper
         return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
     }
 
+    public function __toString()
+    {
+        return $this->saveXML();
+    }
+
     public function retrieveAttributeNode(string $path, string $attribute, $createIfNotExists = false)
     {
         $node = $this->retrieveNode($path, $createIfNotExists);
