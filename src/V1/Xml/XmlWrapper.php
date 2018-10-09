@@ -213,6 +213,27 @@ class XmlWrapper
         return $parentNode;
     }
 
+    public function getChildrenPaths(string $path)
+    {
+        $path = $this->normalizePath($path);
+        $node = $this->retrieveNode($path, false);
+
+        if ($node === null) {
+            return [];
+        }
+
+        $paths = [];
+        $childrens = $node->childNodes;
+        $childrensCount = $childrens->length;
+        for ($i = 0; $i < $childrensCount; $i++) {
+            $child = $childrens->item($i);
+            $childTag = $child->localName;
+            $childPath = $path . "/" . $childTag;
+            $paths[] = $childPath;
+        }
+        return $paths;
+    }
+
     /**
      * Setta una proprietà della fattura. Il path della fattura segue il formato
      * specificato da:
