@@ -85,7 +85,10 @@ class Client
         $command = \strtolower($command);
         $apiUuid = $this->uuid;
         $options = [
-            'form_params' => $this->buildRequestArray($data)
+            'form_params' => $this->buildRequestArray($data),
+            'allow_redirects' => [
+                'strict' => true
+            ]
         ];
         $client = new \GuzzleHttp\Client([
             'base_uri' => $this->endpoint,
