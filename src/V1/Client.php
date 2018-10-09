@@ -35,7 +35,7 @@ class Client
         $this->privateKey = $privateKey;
     }
 
-    public function parse($fiRequest)
+    public function verify($fiRequest)
     {
         if (empty($fiRequest)) {
             throw new \InvalidArgumentException("Parameter 'fiRequest' can't be empty.");
@@ -45,8 +45,14 @@ class Client
         $efSignature = $fiRequest["fingerprint"];
         $digest = new Digest($this->uuid, $this->privateKey, $efPayload);
         if (!$digest->verify($efSignature)) {
-            throw new \InvalidArgumentException("Mismatching signature.");
+            throw new EFattureWsClientException("Mismatching signature.");
         }
+    }
+
+    public function parse($fiRequest)
+    {
+        $efPayload = $fiRequest["payload"];
+        $efSignature = $fiRequest["fingerprint"];
 
         $data = [];
         $data['webhookMessage'] = $efPayload["webhookMessage"];
