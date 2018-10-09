@@ -9,7 +9,14 @@ class SchemaValidator implements XmlWrapperValidator {
 
     private $schemaLocation;
 
-    public function __construct(string $schemaLocation) {
+    public function __construct($schemaLocation) {
+        if (!is_string($schemaLocation)) {
+            $givenType = (\is_object($schemaLocation)) ? get_class($schemaLocation) : gettype($schemaLocation);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $this->schemaLocation = $schemaLocation;
     }
 

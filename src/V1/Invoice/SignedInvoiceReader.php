@@ -16,14 +16,21 @@ class SignedInvoiceReader
     private $signingMethod;
     private $invoiceData;
 
-    public const CAdES_BES = "CAdES-BES";
-    public const XAdES_BES = "XAdES-BES";
+    const CAdES_BES = "CAdES-BES";
+    const XAdES_BES = "XAdES-BES";
 
     private function __construct() {
     }
 
-    public static function getSigningMethodByFileName(string $fileName)
+    public static function getSigningMethodByFileName($fileName)
     {
+        if (!is_string($fileName)) {
+            $givenType = (\is_object($fileName)) ? get_class($fileName) : gettype($fileName);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $fileName = \trim($fileName);
 
         if (preg_match('/.xml.p7m$/i', $fileName) === 1) {
@@ -35,8 +42,15 @@ class SignedInvoiceReader
         return false;
     }
 
-    public static function getFileExtensionBySigningMethod(string $signingMethod)
+    public static function getFileExtensionBySigningMethod($signingMethod)
     {
+        if (!is_string($signingMethod)) {
+            $givenType = (\is_object($signingMethod)) ? get_class($signingMethod) : gettype($signingMethod);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         if ($signingMethod === self::CAdES_BES) {
             return "xml.p7m";
         }
@@ -46,8 +60,15 @@ class SignedInvoiceReader
         return false;
     }
 
-    public static function removeXadESBESSignature(string $content)
+    public static function removeXadESBESSignature($content)
     {
+        if (!is_string($content)) {
+            $givenType = (\is_object($content)) ? get_class($content) : gettype($content);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $domDocument = new \DomDocument();
         $domDocument->loadXML($content);
         $nodes = $domDocument->getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature");
@@ -61,6 +82,13 @@ class SignedInvoiceReader
     {
         if (!in_array($signingMethod, [ self::CAdES_BES, self::XAdES_BES ])) {
             throw new EFattureWsClientException("Field 'signingMethod' must be 'CAdES-BES' or 'XAdES-BES'.");
+        }
+
+        if (!is_string($string)) {
+            $givenType = (\is_object($string)) ? get_class($string) : gettype($string);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
         }
 
         $invoice = new self;

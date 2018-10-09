@@ -33,12 +33,6 @@ class XmlWrapper
         }
     }
 
-    public function clone()
-    {
-        $self = new self($this->domDocument);
-        return $self;
-    }
-
     public function addValidator(XmlWrapperValidator $validator)
     {
         $this->validators[] = $validator;
@@ -143,8 +137,21 @@ class XmlWrapper
         return $path;
     }
 
-    public function retrieveNode(string $path, $createIfNotExists = false)
+    public function retrieveNode($path, $createIfNotExists = false)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_bool($createIfNotExists)) {
+            $givenType = (\is_object($createIfNotExists)) ? get_class($createIfNotExists) : gettype($createIfNotExists);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "bool", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $parentNode = $this->rootNode;
         $currentPath = "/*";
 
@@ -213,8 +220,15 @@ class XmlWrapper
         return $parentNode;
     }
 
-    public function getChildrenPaths(string $path)
+    public function getChildrenPaths($path)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $path = $this->normalizePath($path);
         $node = $this->retrieveNode($path, false);
 
@@ -249,8 +263,21 @@ class XmlWrapper
      * @param string $value
      * @return void
      */
-    public function set(string $path, string $value)
+    public function set($path, $value)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($value)) {
+            $givenType = (\is_object($value)) ? get_class($value) : gettype($value);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $path = $this->normalizePath($path);
         $node = $this->retrieveNode($path, true);
 
@@ -271,8 +298,15 @@ class XmlWrapper
      * @param string $path
      * @return boolean
      */
-    public function has(string $path)
+    public function has($path)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         if (empty($this->get($path))) {
             return false;
         }
@@ -288,8 +322,15 @@ class XmlWrapper
      * @param string $default
      * @return boolean
      */
-    public function get(string $path, string $default = null)
+    public function get($path, $default = null)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $path = $this->normalizePath($path);
         $path = str_replace($this->rootNodeTag . "/", "/*/", $path);
         $nodes = $this->domXPath->query($path);
@@ -304,8 +345,15 @@ class XmlWrapper
         return $value;
     }
 
-    public function count(string $path)
+    public function count($path)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $path = $this->normalizePath($path);
         $path = str_replace($this->rootNodeTag . "/", "/*/", $path);
         $nodes = $this->domXPath->query($path);
@@ -355,8 +403,27 @@ class XmlWrapper
         return $this->saveXML();
     }
 
-    public function retrieveAttributeNode(string $path, string $attribute, $createIfNotExists = false)
+    public function retrieveAttributeNode($path, $attribute, $createIfNotExists = false)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($attribute)) {
+            $givenType = (\is_object($attribute)) ? get_class($attribute) : gettype($attribute);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_bool($createIfNotExists)) {
+            $givenType = (\is_object($createIfNotExists)) ? get_class($createIfNotExists) : gettype($createIfNotExists);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 3, __METHOD__, "bool", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $node = $this->retrieveNode($path, $createIfNotExists);
         $attributes = $node->attributes;
         $domAttribute = $attributes->getNamedItem($attribute);
@@ -372,15 +439,47 @@ class XmlWrapper
         return $domAttribute;
     }
 
-    public function setAttribute(string $path, string $attribute, string $value)
+    public function setAttribute($path, $attribute, $value)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($attribute)) {
+            $givenType = (\is_object($attribute)) ? get_class($attribute) : gettype($attribute);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($value)) {
+            $givenType = (\is_object($value)) ? get_class($value) : gettype($value);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 3, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $domAttribute = $this->retrieveAttributeNode($path, $attribute, true);
         $domAttribute->value = $value;
         return $this;
     }
 
-    public function getAttribute(string $path, string $attribute, string $default = null)
+    public function getAttribute($path, $attribute, $default = null)
     {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($attribute)) {
+            $givenType = (\is_object($attribute)) ? get_class($attribute) : gettype($attribute);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $domAttribute = $this->retrieveAttributeNode($path, $attribute, false);
         if ($domAttribute === null) {
             return $default;

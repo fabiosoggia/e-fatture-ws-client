@@ -27,16 +27,35 @@ class Client
 
     public function setUuid($uuid)
     {
+        if (!is_string($uuid)) {
+            $givenType = (\is_object($uuid)) ? get_class($uuid) : gettype($uuid);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
         $this->uuid = $uuid;
     }
 
     public function setPrivateKey($privateKey)
     {
+        if (!is_string($privateKey)) {
+            $givenType = (\is_object($privateKey)) ? get_class($privateKey) : gettype($privateKey);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
         $this->privateKey = $privateKey;
     }
 
     public function verify($fiRequest)
     {
+        if (!is_array($fiRequest)) {
+            $givenType = (\is_object($fiRequest)) ? get_class($fiRequest) : gettype($fiRequest);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         if (empty($fiRequest)) {
             throw new \InvalidArgumentException("Parameter 'fiRequest' can't be empty.");
         }
@@ -51,6 +70,13 @@ class Client
 
     public function parse($fiRequest)
     {
+        if (!is_array($fiRequest)) {
+            $givenType = (\is_object($fiRequest)) ? get_class($fiRequest) : gettype($fiRequest);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $efPayload = $fiRequest["payload"];
         $efSignature = $fiRequest["fingerprint"];
 
@@ -70,8 +96,15 @@ class Client
         return (object) $data;
     }
 
-    public function buildRequestArray(array $data)
+    public function buildRequestArray($data)
     {
+        if (!is_array($data)) {
+            $givenType = (\is_object($data)) ? get_class($data) : gettype($data);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $apiUuid = $this->uuid;
         $payload = $data;
         $fingerprint = $this->createDigest($payload);
@@ -85,8 +118,21 @@ class Client
         ];
     }
 
-    public function executeHttpRequest($command, array $data)
+    public function executeHttpRequest($command, $data)
     {
+        if (!is_string($command)) {
+            $givenType = (\is_object($command)) ? get_class($command) : gettype($command);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_array($data)) {
+            $givenType = (\is_object($data)) ? get_class($data) : gettype($data);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $method = \strtoupper($this->method);
         $command = \strtolower($command);
         $apiUuid = $this->uuid;
@@ -177,6 +223,13 @@ class Client
 
     public function createDigest(array $payload)
     {
+        if (!is_array($payload)) {
+            $givenType = (\is_object($payload)) ? get_class($payload) : gettype($payload);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $digest = new Digest($this->uuid, $this->privateKey, $payload);
 		return (string) $digest;
     }
@@ -246,8 +299,39 @@ class Client
      * @param boolean $transmits se true (false) abilita (disabilita) l'invio delle fatture
      * @return array
      */
-    public function setUser(string $kind, string $idPaese, string $codice, bool $receives, bool $transmits)
+    public function setUser($kind, $idPaese, $codice, $receives, $transmits)
     {
+        if (!is_string($kind)) {
+            $givenType = (\is_object($kind)) ? get_class($kind) : gettype($kind);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($idPaese)) {
+            $givenType = (\is_object($idPaese)) ? get_class($idPaese) : gettype($idPaese);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_string($codice)) {
+            $givenType = (\is_object($codice)) ? get_class($codice) : gettype($codice);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 3, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_bool($receives)) {
+            $givenType = (\is_object($receives)) ? get_class($receives) : gettype($receives);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 4, __METHOD__, "bool", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_bool($transmits)) {
+            $givenType = (\is_object($transmits)) ? get_class($transmits) : gettype($transmits);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 5, __METHOD__, "bool", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $kind = \strtolower(\trim($kind));
         if (!in_array($kind, ["cf", "piva"])) {
             throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva'.", ErrorCodes::SYS_00003);
@@ -289,8 +373,15 @@ class Client
      * @param string $riferimentoFattura Descrive a quale fattura si riferisce l’esito; se non valorizzato si intende riferito a tutte le fatture presenti nel file.
      * @return void
      */
-    public function sendEsito(int $sdiInvoiceFileId, NotificaEsito $notificaEsito)
+    public function sendEsito($sdiInvoiceFileId, NotificaEsito $notificaEsito)
     {
+        if (!is_int($sdiInvoiceFileId)) {
+            $givenType = (\is_object($sdiInvoiceFileId)) ? get_class($sdiInvoiceFileId) : gettype($sdiInvoiceFileId);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "int", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $notificaEsito->setIdentificativoSdi("111");
         $notificaEsito->validate();
 

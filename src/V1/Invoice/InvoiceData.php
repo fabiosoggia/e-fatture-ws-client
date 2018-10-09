@@ -12,11 +12,18 @@ use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesVal
 
 class InvoiceData extends XmlWrapper
 {
-    public const FATTURA_B2G = "FPA12";
-    public const FATTURA_B2B = "FPR12";
+    const FATTURA_B2G = "FPA12";
+    const FATTURA_B2B = "FPR12";
 
-    public static function create(string $formato)
+    public static function create($formato)
     {
+        if (!is_string($formato)) {
+            $givenType = (\is_object($formato)) ? get_class($formato) : gettype($formato);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" />';
         $domDocument = new \DOMDocument();
@@ -27,8 +34,15 @@ class InvoiceData extends XmlWrapper
         return $instance;
     }
 
-    public static function loadXML(string $xml)
+    public static function loadXML($xml)
     {
+        if (!is_string($xml)) {
+            $givenType = (\is_object($xml)) ? get_class($xml) : gettype($xml);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $domDocument = new \DOMDocument();
         try {
             $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
@@ -117,13 +131,20 @@ class InvoiceData extends XmlWrapper
         $this->addValidator(new VFPR12DatesValidator());
     }
 
-    public function setVersione(string $formato)
+    public function setVersione($formato)
     {
         return $this->setFormatoTrasmissione($formato);
     }
 
-    public function setFormatoTrasmissione(string $formato)
+    public function setFormatoTrasmissione($formato)
     {
+        if (!is_string($formato)) {
+            $givenType = (\is_object($formato)) ? get_class($formato) : gettype($formato);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $formato = strtoupper($formato);
         if (($formato !== self::FATTURA_B2G) && ($formato !== self::FATTURA_B2B)) {
             throw new InvalidInvoice("Formato must be 'FPA12' or 'FPR12'.");
@@ -136,6 +157,13 @@ class InvoiceData extends XmlWrapper
 
     public function generateFileName($suffix = "")
     {
+        if (!is_string($suffix)) {
+            $givenType = (\is_object($suffix)) ? get_class($suffix) : gettype($suffix);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $idPaese = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $idCodice = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 

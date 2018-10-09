@@ -8,8 +8,15 @@ use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators\SchemaValidator;
 
 class NotificaEsito extends XmlWrapper
 {
-    public static function create(string $formato)
+    public static function create($formato)
     {
+        if (!is_string($formato)) {
+            $givenType = (\is_object($formato)) ? get_class($formato) : gettype($formato);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <types:NotificaEsitoCommittente
                 xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0"
@@ -34,8 +41,15 @@ class NotificaEsito extends XmlWrapper
         return $instance;
     }
 
-    public static function loadXML(string $xml)
+    public static function loadXML($xml)
     {
+        if (!is_string($xml)) {
+            $givenType = (\is_object($xml)) ? get_class($xml) : gettype($xml);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $domDocument = new \DOMDocument();
         try {
             $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
@@ -53,30 +67,74 @@ class NotificaEsito extends XmlWrapper
         $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/MessaggiFatturaTypes_v1.0.xsd"));
     }
 
-    public function setIdentificativoSdi(string $indentificativoId)
+    public function setIdentificativoSdi($indentificativoId)
     {
+        if (!is_string($indentificativoId)) {
+            $givenType = (\is_object($indentificativoId)) ? get_class($indentificativoId) : gettype($indentificativoId);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $this->set("/NotificaEsitoCommittente/IdentificativoSdI", $indentificativoId);
     }
 
-    public function setRiferimentoFattura(string $numeroFattura, int $annoFattura, int $posizioneFattura)
+    public function setRiferimentoFattura($numeroFattura, $annoFattura, $posizioneFattura)
     {
+        if (!is_string($numeroFattura)) {
+            $givenType = (\is_object($numeroFattura)) ? get_class($numeroFattura) : gettype($numeroFattura);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_int($annoFattura)) {
+            $givenType = (\is_object($annoFattura)) ? get_class($annoFattura) : gettype($annoFattura);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "int", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+        if (!is_int($posizioneFattura)) {
+            $givenType = (\is_object($posizioneFattura)) ? get_class($posizioneFattura) : gettype($posizioneFattura);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 3, __METHOD__, "int", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
         $this->set("/NotificaEsitoCommittente/RiferimentoFattura/NumeroFattura", $numeroFattura);
         $this->set("/NotificaEsitoCommittente/RiferimentoFattura/AnnoFattura", $annoFattura);
         $this->set("/NotificaEsitoCommittente/RiferimentoFattura/PosizioneFattura", $posizioneFattura);
     }
 
-    public function setEsito(string $esito)
+    public function setEsito($esito)
     {
+        if (!is_string($esito)) {
+            $givenType = (\is_object($esito)) ? get_class($esito) : gettype($esito);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
         $this->set("/NotificaEsitoCommittente/Esito", $esito);
     }
 
-    public function setDescrizione(string $descrizione)
+    public function setDescrizione($descrizione)
     {
+        if (!is_string($descrizione)) {
+            $givenType = (\is_object($descrizione)) ? get_class($descrizione) : gettype($descrizione);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
         $this->set("/NotificaEsitoCommittente/Descrizione", $descrizione);
     }
 
-    public function setMessageIdCommittente(string $messageIdCommittente)
+    public function setMessageIdCommittente($messageIdCommittente)
     {
+        if (!is_string($messageIdCommittente)) {
+            $givenType = (\is_object($messageIdCommittente)) ? get_class($messageIdCommittente) : gettype($messageIdCommittente);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
         $this->set("/NotificaEsitoCommittente/MessageIdCommittente", $messageIdCommittente);
     }
 }
