@@ -126,7 +126,7 @@ class XmlWrapper
      * @param string $path
      * @return void
      */
-    private function normalizePath(string $path)
+    private function normalizePath($path)
     {
         $path = "/" . $path . "/";
         $path = ltrim($path, "/");
