@@ -6,9 +6,11 @@ use CloudFinance\EFattureWsClient\Exceptions\UnsupportedClientVersion;
 
 class ClientBuilder
 {
-    public static function build(string $version = "1.0")
+    const VERSION_1 = "1.0";
+
+    public static function build($version)
     {
-        if ($version === "1.0") {
+        if ($version === self::VERSION_1) {
             return new \CloudFinance\EFattureWsClient\V1\Client();
         }
 
