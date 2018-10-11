@@ -163,7 +163,6 @@ class Client
 
         $responseBody = (string) $response->getBody();
 
-        var_dump($responseBody);
         $responseJson = json_decode($responseBody, true);
         if ($responseJson === null) {
             throw new RequestException(
