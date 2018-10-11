@@ -167,7 +167,7 @@ class Client
         $responseJson = json_decode($responseBody, true);
         if ($responseJson === null) {
             throw new RequestException(
-                "Unable to parse response",
+                "Unable to parse response:\n\n$responseBody",
                 $request,
                 $response
             );
