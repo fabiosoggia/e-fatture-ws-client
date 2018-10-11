@@ -24,9 +24,24 @@ class WebhookMessages {
      */
     const WEBHOOK_RICEVI_NOTIFICA = "webhook_ricevi_notifica";
 
-    public static function serializeMessage($params)
+    private static function deepConvertToArray(&$params)
     {
         $params = (array) $params;
+        foreach ($params as $key => $value) {
+            if (is_object($value)) {
+                $value = (array) $value;
+            }
+
+            if (is_array($value)) {
+                $params[$key] = self::deepConvertToArray($value);
+            }
+        }
+        return $params;
+    }
+
+    public static function serializeMessage($params)
+    {
+        $params = self::deepConvertToArray($params);
         \array_walk_recursive($params, function (&$value, $key) {
             $value = \base64_encode($value);
         });
