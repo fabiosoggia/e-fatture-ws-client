@@ -20,8 +20,7 @@ class Client
     private $uuid;
     private $privateKey;
 
-    public $method = "POST";
-    public $endpoint = "http://localhost/eFATTURE-ws/public/api/v1/";
+    public $endpoint = "https://stg-ws-sdi.cloudfinancegroup.com:8443/api/v1/";
     public $timeout = 5.0;
     public $verify = true;
 
@@ -118,7 +117,7 @@ class Client
         ];
     }
 
-    public function executeHttpRequest($command, $data)
+    public function executeHttpRequest($command, $data, $method = "POST")
     {
         if (!is_string($command)) {
             $givenType = (\is_object($command)) ? get_class($command) : gettype($command);
@@ -133,7 +132,7 @@ class Client
             throw new \InvalidArgumentException($message);
         }
 
-        $method = \strtoupper($this->method);
+        $method = \strtoupper($method);
         $command = \strtolower($command);
         $apiUuid = $this->uuid;
         $options = [
@@ -163,6 +162,8 @@ class Client
         }
 
         $responseBody = (string) $response->getBody();
+
+        var_dump($responseBody);
         $responseJson = json_decode($responseBody, true);
         if ($responseJson === null) {
             throw new RequestException(
@@ -391,6 +392,23 @@ class Client
         ];
 
         $response = $this->executeHttpRequest("notifications", $payload);
+        return $response;
+    }
+
+    public function getFile($fileUuid)
+    {
+        if (!is_string($fileUuid)) {
+            $givenType = (\is_object($fileUuid)) ? get_class($fileUuid) : gettype($fileUuid);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $payload = [
+            "fileUuid" => $fileUuid . ""
+        ];
+
+        $response = $this->executeHttpRequest("files", $payload, "GET");
         return $response;
     }
 }
