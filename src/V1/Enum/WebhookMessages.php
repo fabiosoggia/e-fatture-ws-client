@@ -27,9 +27,7 @@ class WebhookMessages {
     public static function serializeMessage($params)
     {
         $params = (array) $params;
-        foreach ($params as $key => $value) {
-            $params[$key] = base64_encode($value);
-        }
+        array_walk_recursive($params, "base64_encode");
         $json = json_encode($params);
         if ($json === false) {
             throw new \Exception("Can't serialize message params");
@@ -43,9 +41,7 @@ class WebhookMessages {
         if ($params === false) {
             throw new \Exception("Can't unserialize message params");
         }
-        foreach ($params as $key => $value) {
-            $params[$key] = base64_decode($value);
-        }
+        array_walk_recursive($params, "base64_decode");
         return $params;
     }
 
