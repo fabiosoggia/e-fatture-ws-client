@@ -8,15 +8,8 @@ use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators\SchemaValidator;
 
 class NotificaEsito extends XmlWrapper
 {
-    public static function create($formato)
+    public static function create()
     {
-        if (!is_string($formato)) {
-            $givenType = (\is_object($formato)) ? get_class($formato) : gettype($formato);
-            $message = "Argument %d passed to %s() must be of the type %s, %s given";
-            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
-            throw new \InvalidArgumentException($message);
-        }
-
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <types:NotificaEsitoCommittente
                 xmlns:types="http://www.fatturapa.gov.it/sdi/messaggi/v1.0"
@@ -64,7 +57,7 @@ class NotificaEsito extends XmlWrapper
 
     private function setupValidators()
     {
-        $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/MessaggiFatturaTypes_v1.0.xsd"));
+        $this->addValidator(new SchemaValidator(__DIR__. "/../../../resources/MessaggiTypes_v1.1.xsd"));
     }
 
     public function setIdentificativoSdi($indentificativoId)
