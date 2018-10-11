@@ -27,8 +27,10 @@ class WebhookMessages {
     public static function serializeMessage($params)
     {
         $params = (array) $params;
-        array_walk_recursive($params, "base64_encode");
-        $json = json_encode($params);
+        \array_walk_recursive($params, function (&$value, $key) {
+            $value = \base64_encode($value);
+        });
+        $json = \json_encode($params);
         if ($json === false) {
             throw new \Exception("Can't serialize message params");
         }
@@ -37,11 +39,13 @@ class WebhookMessages {
 
     public static function unserializeMessage($message)
     {
-        $params = json_decode($message, true);
+        $params = \json_decode($message, true);
         if ($params === false) {
             throw new \Exception("Can't unserialize message params");
         }
-        array_walk_recursive($params, "base64_decode");
+        \array_walk_recursive($params, function (&$value, $key) {
+            $value = \base64_decode($value);
+        });
         return $params;
     }
 
