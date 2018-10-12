@@ -151,8 +151,18 @@ class InvoiceData extends XmlWrapper
         }
 
         $this->setAttribute("/FatturaElettronica", "versione", $formato);
-        $this->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
+        parent::set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
         return $this;
+    }
+
+    public function set($path, $value)
+    {
+        if (preg_match('/FormatoTrasmissione$/', $path)) {
+            $this->setFormatoTrasmissione($value);
+            return;
+        }
+
+        parent::set($path, $value);
     }
 
     public function generateFileName($suffix = "")
