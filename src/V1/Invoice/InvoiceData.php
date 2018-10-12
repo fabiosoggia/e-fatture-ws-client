@@ -6,14 +6,16 @@ use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Invoice\FPR12Map;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonValidator;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
-
 
 class InvoiceData extends XmlWrapper
 {
     const FATTURA_B2G = "FPA12";
     const FATTURA_B2B = "FPR12";
+
+    protected $data = [];
 
     public static function create($formato)
     {
@@ -60,68 +62,50 @@ class InvoiceData extends XmlWrapper
      *
      * @return void
      */
-    public function recreateHeader()
+    public function orderTags()
     {
-        // Stacca la testa e sostituiscila con una completa di tutti gli elementi
+        // Valori nodi attualmente presenti nel documento
+        $data = [];
+        $leafs = $this->domXPath->query("//*[not(*)]");
+        for ($i = 0; $i < $leafs->length; $i++) {
+            $leaf = $leafs->item($i);
+            $leafPath = $leaf->getNodePath();
+            $leafPath = preg_replace('/[^\/]*:/', '', $leafPath);
+            $leafValue = $this->get($leafPath);
 
-        // Questi sono tutti i tag di <DatiTrasmissione>.
-        $DatiTrasmissioneValues = [
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ContattiTrasmittente/Telefono" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ContattiTrasmittente/Email" => "",
-            "/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario" => ""
-        ];
-
-        foreach ($DatiTrasmissioneValues as $path => $v) {
-            $value = $this->get($path);
-
-            if (empty($value)) {
+            if (empty($leafValue)) {
                 continue;
             }
 
-            $DatiTrasmissioneValues[$path] = $value;
+            $data[$leafPath] = $this->get($leafPath);
         }
 
-        // Questi sono i nodi di <FatturaElettronicaHeader> che vanno preservati
-        // (se presenti) e aggiunti in coda a <DatiTrasmissione>.
-        $FatturaElettronicaHeaderOldNodes = [
-            "/FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore" => null,
-            "/FatturaElettronica/FatturaElettronicaHeader/RappresentanteFiscale" => null,
-            "/FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente" => null,
-            "/FatturaElettronica/FatturaElettronicaHeader/TerzoIntermediarioOSoggettoEmittente" => null,
-            "/FatturaElettronica/FatturaElettronicaHeader/SoggettoEmittente" => null
-        ];
-        foreach ($FatturaElettronicaHeaderOldNodes as $path => $n) {
-            $node = $this->retrieveNode($path);
-            $FatturaElettronicaHeaderOldNodes[$path] = $node;
+        // Pulisci il documento attuale
+        $this->domDocument->documentElement->nodeValue = "";
+        while ($this->domDocument->documentElement->childNodes->length > 0) {
+            $this->domDocument->documentElement->removeChild($this->domDocument->documentElement->childNodes->item(0));
         }
 
-        $FatturaElettronicaHeaderOldNode = $this->retrieveNode("/FatturaElettronica/FatturaElettronicaHeader");
-        $FatturaElettronicaHeaderNewNode = $this->domDocument->createElement("FatturaElettronicaHeader");
-        $res = $this->rootNode->replaceChild($FatturaElettronicaHeaderNewNode, $FatturaElettronicaHeaderOldNode);
-        if ($res === false) {
-            throw new InvalidInvoice("Unable to replace header");
-        }
+        // Rigenera il documento secondo l'ordinamento definito in $map
+        $map = FPR12Map::get();
+        $leafsPaths = array_keys($data);
+        foreach ($map as $mapPath) {
+            $regexPath = $mapPath;
+            $regexPath = str_replace('[n]', '', $mapPath);
+            $regexPath = str_replace('/', '(\[.*\])?\/', $regexPath);
+            $regexPath = '/.?' . $regexPath . '/';
 
-        foreach ($DatiTrasmissioneValues as $path => $value) {
-            $this->set($path, $value);
-        }
+            $matches  = preg_grep($regexPath, $leafsPaths);
 
-        foreach ($FatturaElettronicaHeaderOldNodes as $path => $node) {
-            if ($node === null) {
-                continue;
+            foreach ($matches as $match) {
+                parent::set($match, $data[$match]);
             }
-            $FatturaElettronicaHeaderNewNode->appendChild($node);
         }
     }
 
     public function normalize()
     {
-        $this->recreateHeader();
+        $this->orderTags();
         parent::normalize();
     }
 
