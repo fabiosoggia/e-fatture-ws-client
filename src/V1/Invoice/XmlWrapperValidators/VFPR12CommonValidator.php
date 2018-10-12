@@ -280,7 +280,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         // <ImponibileImporto> deve essere uguale, per ogni valore distinto di
         // aliquota IVA, al risultato della seguente operazione:
         //
-        //      Σ PrezzoTotale[y] + Σ ImportoContributoCassa[x] + Σ Arrotondamento[z]
+        //      Σ(n) PrezzoTotale[y] + Σ(m) ImportoContributoCassa[x] + Σ(t) Arrotondamento[z]
         //
         // dove n è il numero di linee di dettaglio con stessa aliquota IVA, m è il
         // numero di blocchi di dati cassa previdenziale con stessa aliquota IVA, t è il
