@@ -45,7 +45,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         \libxml_use_internal_errors($internalErrorPreviousValue);
         $nativeErrorsCount = count($nativeErrors);
 
-
+        $xmlWrapper->saveXML(true);
         if ($nativeErrorsCount > 50) {
             // 00201: Riscontrati più di 50 errori di formato
             $message = $nativeErrors[0]->message;
@@ -54,7 +54,9 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         } elseif ($nativeErrorsCount > 0) {
             // 00200: File non conforme al formato
             $message = $nativeErrors[0]->message;
-            $errors[ErrorCodes::FPR12_00200] = "File non conforme al formato ($message)";
+            $line = $nativeErrors[0]->line;
+            $column = $nativeErrors[0]->column;
+            $errors[ErrorCodes::FPR12_00200] = "File non conforme al formato ($message, linea: $line, colonna: $column)";
             return $errors;
         }
 
