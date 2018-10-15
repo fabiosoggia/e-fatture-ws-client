@@ -5,6 +5,21 @@ namespace CloudFinance\EFattureWsClient\V1\Xml;
 use \DOMDocument;
 use \DOMXPath;
 
+
+// Example:
+//
+// $outputFilePath = __DIR__ . "/../../../resources/output.csv";
+// $xsdPath = __DIR__ . "/../../../resources/Schema_VFPR12.xsd";
+// $parser = new XSDSchemaParser($xsdPath);
+// $outputFile = fopen($outputFilePath, "w");
+// $parser->toCSVFile($outputFile);
+// fclose($outputFile);
+
+
+/**
+ * Questa classe permette di estrapolare informazioni strutturali descritte
+ * nei file XSD.
+ */
 class XSDSchemaParser {
 
     private $xsdPath;
