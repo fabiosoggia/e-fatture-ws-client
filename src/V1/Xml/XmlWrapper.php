@@ -360,6 +360,11 @@ class XmlWrapper
         return $nodes->length;
     }
 
+    /**
+     * Rimuove i tag vuoti dall'XML.
+     *
+     * @return this
+     */
     public function normalize()
     {
         // Rimove tag vuoti.
@@ -485,5 +490,25 @@ class XmlWrapper
             return $default;
         }
         return $domAttribute->value;
+    }
+
+    /**
+     * Restituisci i dati dell'xml come array associativo di path => valore.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $data = [];
+        $leafs = $this->domXPath->query("//*[not(*)]");
+        for ($i = 0; $i < $leafs->length; $i++) {
+            $leaf = $leafs->item($i);
+            // TODO: getNodePath() potrebbe restituire dei path inattesi
+            $leafPath = $leaf->getNodePath();
+            $leafPath = preg_replace('/[^\/]*:/', '', $leafPath);
+            $data[$leafPath] = $this->get($leafPath);
+        }
+
+        return $data;
     }
 }

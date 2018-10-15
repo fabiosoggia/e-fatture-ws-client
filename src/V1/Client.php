@@ -249,6 +249,7 @@ class Client
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio", \str_repeat("0", 10));
 
         // Valida contenuto della fattura
+        $invoice->normalize();
         $invoice->validate();
 
         // Effettua la richiesta

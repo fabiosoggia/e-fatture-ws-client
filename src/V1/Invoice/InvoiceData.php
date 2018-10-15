@@ -57,20 +57,7 @@ class InvoiceData extends XmlWrapper
     public function orderTags()
     {
         // Valori nodi attualmente presenti nel documento
-        $data = [];
-        $leafs = $this->domXPath->query("//*[not(*)]");
-        for ($i = 0; $i < $leafs->length; $i++) {
-            $leaf = $leafs->item($i);
-            $leafPath = $leaf->getNodePath();
-            $leafPath = preg_replace('/[^\/]*:/', '', $leafPath);
-            $leafValue = $this->get($leafPath);
-
-            if (empty($leafValue)) {
-                continue;
-            }
-
-            $data[$leafPath] = $this->get($leafPath);
-        }
+        $data = $this->toArray();
 
         // Pulisci il documento attuale
         $this->domDocument->documentElement->nodeValue = "";
@@ -90,14 +77,26 @@ class InvoiceData extends XmlWrapper
             $matches  = preg_grep($regexPath, $leafsPaths);
 
             foreach ($matches as $match) {
+                $value = $data[$match];
+                if (empty($value)) {
+                    continue;
+                }
+
                 parent::set($match, $data[$match]);
             }
         }
     }
 
+    /**
+     * Rimuove i tag vuoti dall'XML e riorganizzali secondo la sequenza definita
+     * dallo schema.
+     *
+     * @return this
+     */
     public function normalize()
     {
         $this->orderTags();
+        return $this;
         // parent::normalize();
     }
 
