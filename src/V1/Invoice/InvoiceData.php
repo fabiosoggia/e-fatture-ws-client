@@ -17,21 +17,13 @@ class InvoiceData extends XmlWrapper
 
     protected $data = [];
 
-    public static function create($formato)
+    public static function create()
     {
-        if (!is_string($formato)) {
-            $givenType = (\is_object($formato)) ? get_class($formato) : gettype($formato);
-            $message = "Argument %d passed to %s() must be of the type %s, %s given";
-            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
-            throw new \InvalidArgumentException($message);
-        }
-
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" />';
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($xml);
         $instance = new self($domDocument);
-        $instance->setFormatoTrasmissione($formato);
         $instance->setupValidators();
         return $instance;
     }
