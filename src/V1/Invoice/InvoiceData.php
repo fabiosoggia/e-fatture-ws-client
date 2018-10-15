@@ -106,7 +106,7 @@ class InvoiceData extends XmlWrapper
     public function normalize()
     {
         $this->orderTags();
-        parent::normalize();
+        // parent::normalize();
     }
 
     private function setupValidators()

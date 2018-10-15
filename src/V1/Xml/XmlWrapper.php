@@ -64,7 +64,7 @@ class XmlWrapper
      */
     public function getFingerprint()
     {
-        $this->normalize();
+        // $this->normalize();
 
         $nodeList = $this->domXPath->query('//*[not(*)]');
         $nodes = [];
@@ -110,7 +110,7 @@ class XmlWrapper
 
     public function getErrors()
     {
-        $this->normalize();
+        // $this->normalize();
 
         $errors = [];
         foreach ($this->validators as $validator) {
@@ -393,7 +393,7 @@ class XmlWrapper
             $this->domDocument->formatOutput = true;
         }
 
-        $this->normalize();
+        // $this->normalize();
 
         return $this->domDocument->saveXML(null, LIBXML_NOEMPTYTAG | LIBXML_NOBLANKS);
     }
