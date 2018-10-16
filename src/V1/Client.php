@@ -241,7 +241,7 @@ class Client
      * @param InvoiceData $invoice
      * @return array
      */
-    public function sendInvoice(InvoiceData $invoice)
+    public function sendInvoice(InvoiceData $invoice, $username = "", $password = "")
     {
         // Compila campi "obbligatori"
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");
@@ -254,7 +254,11 @@ class Client
 
         // Effettua la richiesta
         $invoiceXml = $invoice->saveXML();
-        $payload = [ "invoiceXml" => $invoiceXml ];
+        $payload = [
+            "invoiceXml" => $invoiceXml,
+            "username" => $username,
+            "password" => $password,
+        ];
         $response = $this->executeHttpRequest("invoices", $payload);
         return $response;
     }
