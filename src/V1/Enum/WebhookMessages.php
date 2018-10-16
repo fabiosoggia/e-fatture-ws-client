@@ -5,6 +5,11 @@ namespace CloudFinance\EFattureWsClient\V1\Enum;
 class WebhookMessages {
 
     /**
+     * Firma fattura fallita.
+     */
+    const WEBHOOK_FIRMA_FATTURA = "webhook_firma_fattura";
+
+    /**
      * Fattura inviata all'SdI.
      */
     const WEBHOOK_INVIO_FATTURA = "webhook_invio_fattura";
