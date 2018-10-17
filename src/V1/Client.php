@@ -80,6 +80,9 @@ class Client
         $efSignature = $fiRequest["fingerprint"];
 
         $data = [];
+        $data['id'] = intval($efPayload["id"]);
+        $data['webhookId'] = intval($efPayload["webhookId"]);
+        $data['webhookAttempt'] = intval($efPayload["webhookAttempt"]);
         $data['webhookMessage'] = $efPayload["webhookMessage"];
         $data['sdiNotification'] = $efPayload["sdiNotification"];
         $data['sdiInvoiceFileId'] = intval($efPayload["sdiInvoiceFileId"]);
