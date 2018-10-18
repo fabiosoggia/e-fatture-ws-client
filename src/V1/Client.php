@@ -391,6 +391,7 @@ class Client
         }
 
         $notificaEsito->setIdentificativoSdi("111");
+        $notificaEsito->normalize();
         $notificaEsito->validate();
 
         $payload = [
