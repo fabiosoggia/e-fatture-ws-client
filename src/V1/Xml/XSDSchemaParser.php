@@ -155,7 +155,7 @@ class XSDSchemaParser {
             return $results;
         }
 
-        return [ "$name" => [] ];
+        return [ "$name" => [ "restriction.base" => $type ] ];
     }
 
     public function parse()
@@ -170,7 +170,7 @@ class XSDSchemaParser {
             foreach ($this->attributesHeaders as $header) {
                 $normalizedValues[] = isset($attributes[$header]) ? $attributes[$header] : "";
             }
-            array_unshift($normalizedValues, $path);
+            $normalizedValues[0] = $path;
             $this->values[] = $normalizedValues;
         }
     }
