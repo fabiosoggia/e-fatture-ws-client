@@ -49,6 +49,11 @@ class XmlWrapper
         return $this->domXPath;
     }
 
+    public function getRootNodeTag()
+    {
+        return $this->rootNodeTag;
+    }
+
     /**
      * Questo metodo restituisce una stringa univoca che identifica la struttura
      * dell'XML. La stringa ottenuta è indipendente dalla posizione dei nodi
