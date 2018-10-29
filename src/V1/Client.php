@@ -224,12 +224,12 @@ class Client
         );
     }
 
-    public function createDigest(array $payload)
+    public function createDigest($payload)
     {
-        if (!is_array($payload)) {
+        if (!is_string($payload)) {
             $givenType = (\is_object($payload)) ? get_class($payload) : gettype($payload);
             $message = "Argument %d passed to %s() must be of the type %s, %s given";
-            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
             throw new \InvalidArgumentException($message);
         }
 
