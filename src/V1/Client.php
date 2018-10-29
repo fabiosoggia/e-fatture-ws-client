@@ -100,10 +100,10 @@ class Client
 
     public function buildRequestArray($data)
     {
-        if (!is_array($data)) {
+        if (!is_string($data)) {
             $givenType = (\is_object($data)) ? get_class($data) : gettype($data);
             $message = "Argument %d passed to %s() must be of the type %s, %s given";
-            $message = sprintf($message, 1, __METHOD__, "array", $givenType);
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
             throw new \InvalidArgumentException($message);
         }
 
