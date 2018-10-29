@@ -24,12 +24,15 @@ class Digest
             $message = sprintf($message, 2, __METHOD__, "string", $givenType);
             throw new \InvalidArgumentException($message);
         }
-
-        if (\is_array($payload)) {
-            \ksort($payload);
+        if (!is_string($payload)) {
+            $givenType = (\is_object($payload)) ? get_class($payload) : gettype($payload);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 3, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
         }
+
         $key = $uuid . ":" . $privateKey;
-        $digest = \hash_hmac("sha256", json_encode($payload), $key);
+        $digest = \hash_hmac("sha256", $payload, $key);
         return $digest;
     }
 

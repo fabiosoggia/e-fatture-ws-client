@@ -76,7 +76,7 @@ class Client
             throw new \InvalidArgumentException($message);
         }
 
-        $efPayload = $fiRequest["payload"];
+        $efPayload = json_decode($fiRequest["payload"], true);
         $efSignature = $fiRequest["fingerprint"];
 
         $data = [];
