@@ -135,6 +135,10 @@ class Client
             throw new \InvalidArgumentException($message);
         }
 
+        if (!is_string($data)) {
+            $data = json_encode($data);
+        }
+
         $method = \strtoupper($method);
         $command = \strtolower($command);
         $apiUuid = $this->uuid;
