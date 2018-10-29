@@ -48,6 +48,11 @@ class WebhookMessages {
     {
         $params = self::deepConvertToArray($params);
         \array_walk_recursive($params, function (&$value, $key) {
+            if (is_string($value) && empty($value)) {
+                $value = "";
+                return;
+            }
+
             $value = \base64_encode($value);
         });
         $json = \json_encode($params);
@@ -64,6 +69,11 @@ class WebhookMessages {
             throw new \Exception("Can't unserialize message params");
         }
         \array_walk_recursive($params, function (&$value, $key) {
+            if (is_string($value) && empty($value)) {
+                $value = "";
+                return;
+            }
+
             $value = \base64_decode($value);
         });
         return $params;
