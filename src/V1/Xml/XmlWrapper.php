@@ -291,7 +291,7 @@ class XmlWrapper
             throw new EFattureWsClientException($m);
         }
 
-        $node->nodeValue = \trim($value);
+        $node->nodeValue = \htmlspecialchars(\trim($value));
         return $this;
     }
 
