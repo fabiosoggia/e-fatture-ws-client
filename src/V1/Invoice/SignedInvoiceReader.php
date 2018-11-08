@@ -78,6 +78,82 @@ class SignedInvoiceReader
         return $domDocument->saveXML();
     }
 
+    /**
+     * Verifica che una stringa xml sia firmata con XAdES-BES.
+     *
+     * @param string $content
+     * @return boolean
+     */
+    public static function isXadESBESSigned($content)
+    {
+        if (!is_string($content)) {
+            $givenType = (\is_object($content)) ? get_class($content) : gettype($content);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $domDocument = new \DomDocument();
+        $domDocument->loadXML($content);
+        $nodes = $domDocument->getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature");
+        foreach ($nodes as $node) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Verifica che una stringa xml sia firmata con CAdES-BES.
+     *
+     * @param string $content
+     * @return boolean
+     */
+    public static function isCadESBESSigned($content)
+    {
+        if (!is_string($content)) {
+            $givenType = (\is_object($content)) ? get_class($content) : gettype($content);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $fileSignedPath = \tempnam(\sys_get_temp_dir(), "fsp");
+        $filePlainPath = \tempnam(\sys_get_temp_dir(), "fpp");
+
+        if (($fileSignedPath === false) || ($filePlainPath === false)) {
+            throw new EFattureWsClientException("Unable to create temporary files.");
+        }
+
+        $res = \file_put_contents($fileSignedPath, $content);
+        if ($res === false) {
+            throw new EFattureWsClientException("Unable to write temporary files.");
+        }
+
+        $openSslCommand = "openssl smime -verify -noverify -in '%s' -inform DER -out '%s'";
+        $openSslCommand = \sprintf($openSslCommand, $fileSignedPath, $filePlainPath);
+        $res = \exec($openSslCommand, $output);
+        $filePlainContent = \file_get_contents($filePlainPath);
+        unlink($filePlainPath);
+        unlink($fileSignedPath);
+
+        if (empty($filePlainContent)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verifica che una stringa xml sia firmata con CAdES-BES o XAdES-BES.
+     *
+     * @param string $content
+     * @return boolean
+     */
+    public static function isSigned($content)
+    {
+        return (self::isXadESBESSigned($content) || self::isCadESBESSigned($content));
+    }
+
     public static function createFromSignedString($signingMethod, $string)
     {
         if (!in_array($signingMethod, [ self::CAdES_BES, self::XAdES_BES ])) {
@@ -115,6 +191,10 @@ class SignedInvoiceReader
         }
 
         if ($signingMethod === self::XAdES_BES) {
+            if (!self::isXadESBESSigned($string)) {
+                throw new EFattureWsClientException("Invalid XAdES-BES file.");
+            }
+
             $invoice->filePlainContent = self::removeXadESBESSignature($string);
         }
 
@@ -126,7 +206,7 @@ class SignedInvoiceReader
         $invoice->signingMethod = $signingMethod;
 
         if (empty($invoice->filePlainContent)) {
-            throw new EFattureWsClientException("Openssl was unable to decrypt file.");
+            throw new EFattureWsClientException("Invalid CAdES-BES file.");
         }
 
         $invoice->invoiceData = InvoiceData::loadXML($invoice->getFilePlainContent());
