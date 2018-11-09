@@ -250,6 +250,11 @@ class Client
      */
     public function sendInvoice(InvoiceData $invoice, $username = "", $password = "")
     {
+        $format = $invoice->getFormatoTrasmissione();
+        if ($format === InvoiceData::FATTURA_FSM) {
+            throw new ApiRequestException("The invoice format can't be FSM10.", ErrorCodes::FPR12_00200);
+        }
+
         // Compila campi "obbligatori"
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", \str_repeat("0", 28));
@@ -280,6 +285,11 @@ class Client
     public function uploadInvoice(SignedInvoiceReader $signedInvoiceReader)
     {
         $invoice = $signedInvoiceReader->getInvoiceData();
+
+        $format = $invoice->getFormatoTrasmissione();
+        if ($format === InvoiceData::FATTURA_FSM) {
+            throw new ApiRequestException("The invoice format can't be FSM10.", ErrorCodes::FPR12_00200);
+        }
 
         // Valida contenuto della fattura
         $invoice->validate();

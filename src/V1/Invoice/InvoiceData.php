@@ -5,17 +5,18 @@ namespace CloudFinance\EFattureWsClient\V1\Invoice;
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidInvoice;
 use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
-use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use CloudFinance\EFattureWsClient\V1\Invoice\FPR12Map;
+use CloudFinance\EFattureWsClient\V1\Invoice\FSM10Map;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonValidator;
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
+use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators\SchemaValidator;
 
 class InvoiceData extends XmlWrapper
 {
     const FATTURA_B2G = "FPA12";
     const FATTURA_B2B = "FPR12";
-
-    protected $data = [];
+    const FATTURA_FSM = "FSM10";
 
     public static function create()
     {
@@ -24,7 +25,16 @@ class InvoiceData extends XmlWrapper
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($xml);
         $instance = new self($domDocument);
-        $instance->setupValidators();
+        return $instance;
+    }
+
+    public static function createFSM10()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronicaSemplificata xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.0" />';
+        $domDocument = new \DOMDocument();
+        $domDocument->loadXML($xml);
+        $instance = new self($domDocument);
         return $instance;
     }
 
@@ -45,7 +55,6 @@ class InvoiceData extends XmlWrapper
             throw new InvalidXml($error, $ex->getCode());
         }
         $instance = new self($domDocument);
-        $instance->setupValidators();
         return $instance;
     }
 
@@ -56,6 +65,8 @@ class InvoiceData extends XmlWrapper
      */
     public function orderTags()
     {
+        $formato = $this->getFormatoTrasmissione();
+
         // Valori nodi attualmente presenti nel documento
         $data = $this->toArray();
 
@@ -66,7 +77,7 @@ class InvoiceData extends XmlWrapper
         }
 
         // Rigenera il documento secondo l'ordinamento definito in $map
-        $map = FPR12Map::get();
+        $map = ($formato === self::FATTURA_FSM) ? FSM10Map::get() : FPR12Map::get();
         $leafsPaths = array_keys($data);
         foreach ($map as $mapPath) {
             $regexPath = $mapPath;
@@ -100,10 +111,19 @@ class InvoiceData extends XmlWrapper
         // parent::normalize();
     }
 
-    private function setupValidators()
+    public function getErrors()
     {
-        $this->addValidator(new VFPR12CommonValidator());
-        $this->addValidator(new VFPR12DatesValidator());
+        $formato = $this->getFormatoTrasmissione();
+        $this->validators = [];
+
+        if ($formato === self::FATTURA_FSM) {
+            $this->addValidator(new SchemaValidator(__DIR__ . "/../../../resources/Schema_VFSM10.xsd"));
+        } else {
+            $this->addValidator(new VFPR12CommonValidator());
+            $this->addValidator(new VFPR12DatesValidator());
+        }
+
+        return parent::getErrors();
     }
 
     public function setVersione($formato)
@@ -121,12 +141,13 @@ class InvoiceData extends XmlWrapper
         }
 
         $formato = strtoupper($formato);
-        if (($formato !== self::FATTURA_B2G) && ($formato !== self::FATTURA_B2B)) {
-            throw new InvalidInvoice("Formato must be 'FPA12' or 'FPR12'.");
+        if (!(in_array($formato, [ self::FATTURA_B2B, self::FATTURA_B2G, self::FATTURA_FSM ]))) {
+            throw new InvalidInvoice("Formato must be 'FPA12', 'FPR12' o 'FSM10'.");
         }
 
-        $this->setAttribute("/FatturaElettronica", "versione", $formato);
-        parent::set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
+        $rootNodeTag = $this->getRootNodeTag();
+        $this->setAttribute("/$rootNodeTag", "versione", $formato);
+        parent::set("/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione", $formato);
         return $this;
     }
 
@@ -149,8 +170,8 @@ class InvoiceData extends XmlWrapper
             throw new \InvalidArgumentException($message);
         }
 
-        $idPaese = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
-        $idCodice = $this->get("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+        $idPaese = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
+        $idCodice = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 
         if (empty($idPaese)) {
             throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdPaese' field.");
@@ -166,8 +187,8 @@ class InvoiceData extends XmlWrapper
 
     public function getTrasmittente()
     {
-        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
-        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
+        $idPaese = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
+        $idCodice = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 
         if (empty($idPaese) || empty($idCodice)) {
             return null;
@@ -178,16 +199,22 @@ class InvoiceData extends XmlWrapper
 
     public function getProgressivoInvio()
     {
-        $progressivoInvio = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio");
+        $progressivoInvio = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio");
 
         return $progressivoInvio;
     }
 
     public function getCedentePrestatore()
     {
-        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese");
-        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdCodice");
-        $codiceFiscale = $this->get("FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/CodiceFiscale");
+        $idPaese = $this->get("/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese");
+        $idCodice = $this->get("/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdCodice");
+        $codiceFiscale = $this->get("/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/CodiceFiscale");
+
+        if ($this->getFormatoTrasmissione() === self::FATTURA_FSM) {
+            $idPaese = $this->get("/FatturaElettronicaHeader/CedentePrestatore/IdFiscaleIVA/IdPaese");
+            $idCodice = $this->get("/FatturaElettronicaHeader/CedentePrestatore/IdFiscaleIVA/IdCodice");
+            $codiceFiscale = $this->get("/FatturaElettronicaHeader/CedentePrestatore/CodiceFiscale");
+        }
 
         return [
             "idPaese" => $idPaese,
@@ -198,9 +225,15 @@ class InvoiceData extends XmlWrapper
 
     public function getCessionarioCommittente()
     {
-        $idPaese = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdPaese");
-        $idCodice = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice");
-        $codiceFiscale = $this->get("FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/CodiceFiscale");
+        $idPaese = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdPaese");
+        $idCodice = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA/IdCodice");
+        $codiceFiscale = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/CodiceFiscale");
+
+        if ($this->getFormatoTrasmissione() === self::FATTURA_FSM) {
+            $idPaese = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/IdentificativiFiscali/IdFiscaleIVA/IdPaese");
+            $idCodice = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/IdentificativiFiscali/IdFiscaleIVA/IdCodice");
+            $codiceFiscale = $this->get("/FatturaElettronicaHeader/CessionarioCommittente/IdentificativiFiscali/CodiceFiscale");
+        }
 
         return [
             "idPaese" => $idPaese,
@@ -211,26 +244,27 @@ class InvoiceData extends XmlWrapper
 
     public function getFormatoTrasmissione()
     {
-        $formatoTrasmissione = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione");
+        $formatoTrasmissione = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/FormatoTrasmissione");
 
         return \strtoupper($formatoTrasmissione);
     }
 
     public function getVersione()
     {
-        return $this->getAttribute("/FatturaElettronica", "versione");
+        $rootNodeTag = $this->getRootNodeTag();
+        return $this->getAttribute("/$rootNodeTag", "versione");
     }
 
     public function getCodiceDestinatario()
     {
-        $codiceDestinatario = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario");
+        $codiceDestinatario = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/CodiceDestinatario");
 
         return $codiceDestinatario;
     }
 
     public function getPecDestinatario()
     {
-        $pecDestinatario = $this->get("FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario");
+        $pecDestinatario = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/PECDestinatario");
 
         return $pecDestinatario;
     }
