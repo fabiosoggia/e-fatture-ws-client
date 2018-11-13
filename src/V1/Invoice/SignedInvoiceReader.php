@@ -94,7 +94,12 @@ class SignedInvoiceReader
         }
 
         $domDocument = new \DomDocument();
-        $domDocument->loadXML($content);
+        try {
+            $domDocument->loadXML($content);
+        } catch (\Exception $ex) {
+            return false;
+        }
+
         $nodes = $domDocument->getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature");
         foreach ($nodes as $node) {
             return true;
