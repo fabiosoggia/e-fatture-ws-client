@@ -269,4 +269,21 @@ class InvoiceData extends XmlWrapper
         return $pecDestinatario;
     }
 
+    public function toHtml()
+    {
+        $formato = $this->getFormatoTrasmissione();
+
+        $xslPath = __DIR__ . "/../../../resources/fatturaordinaria_v1.2.1.xsl";
+        if ($formato === self::FATTURA_B2G) {
+            $xslPath = __DIR__ . "/../../../resources/fatturaPA_v1.2.1.xsl";
+        }
+        $xsl = new \DOMDocument();
+        $xsl->load($xslPath);
+
+        $proc = new \XSLTProcessor();
+        $proc->importStyleSheet($xsl);
+
+        return $proc->transformToXML($this->domDocument);
+    }
+
 }
