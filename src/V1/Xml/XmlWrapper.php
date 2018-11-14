@@ -67,10 +67,8 @@ class XmlWrapper
      *
      * @return string
      */
-    public function getFingerprint()
+    public function getContentFingerprint()
     {
-        // $this->normalize();
-
         $nodeList = $this->domXPath->query('//*[not(*)]');
         $nodes = [];
         foreach ($nodeList as $node) {
@@ -92,6 +90,11 @@ class XmlWrapper
         return $fingerprint;
     }
 
+    public function getFingerprint()
+    {
+        $fingerprint = \md5(\strtolower($this->saveXML()));
+        return $fingerprint;
+    }
 
     /**
      * Valida che l'xml costruito sia compatibile con i validator settati. Se

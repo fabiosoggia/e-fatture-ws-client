@@ -204,9 +204,6 @@ class SignedInvoiceReader
         }
 
         $invoice->fileSignedContent = $string;
-        $invoice->fileSignedFingerprint = \md5($invoice->fileSignedContent);
-
-        $invoice->filePlainFingerprint = \md5($invoice->filePlainContent);
 
         $invoice->signingMethod = $signingMethod;
 
@@ -215,6 +212,9 @@ class SignedInvoiceReader
         }
 
         $invoice->invoiceData = InvoiceData::loadXML($invoice->getFilePlainContent());
+
+        $invoice->fileSignedFingerprint = \md5(\strtolower($invoice->fileSignedContent));
+        $invoice->filePlainFingerprint = $invoice->getInvoiceData()->getFingerprint();
         return $invoice;
     }
 
