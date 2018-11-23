@@ -296,12 +296,24 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
             $DatiCassaPrevidenzialeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale");
             for ($j = 1; $j <= $DatiRiepilogoCount; $j++) {
                 $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/AliquotaIVA");
-                $ImponibileImporto = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/ImponibileImporto");
                 // Da verificare
                 $Arrotondamento = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Arrotondamento");
                 $Arrotondamento = floatval($Arrotondamento);
                 $PrezzoTotale = 0.00;
                 $ImportoContributoCassa = 0.00;
+                $ImponibileImporto = 0.00;
+
+                for ($k = 1; $k <= $DatiRiepilogoCount; $k++) {
+                    $AliquotaIVAY = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$k]/AliquotaIVA");
+
+                    if ($AliquotaIVAY !== $AliquotaIVA) {
+                        continue;
+                    }
+
+                    $ImponibileImportoY = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$k]/ImponibileImporto");
+                    $ImponibileImportoY = floatval($ImponibileImportoY);
+                    $ImponibileImporto += $ImponibileImportoY;
+                }
 
                 for ($k = 1; $k <= $DettaglioLineeCount; $k++) {
                     $AliquotaIVAY = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$k]/AliquotaIVA");
