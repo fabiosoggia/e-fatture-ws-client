@@ -120,7 +120,7 @@ class InvoiceData extends XmlWrapper
             $this->addValidator(new SchemaValidator(__DIR__ . "/../../../resources/Schema_VFSM10.xsd"));
         } else {
             $this->addValidator(new VFPR12CommonValidator());
-            $this->addValidator(new VFPR12DatesValidator());
+            // $this->addValidator(new VFPR12DatesValidator());
         }
 
         return parent::getErrors();
