@@ -297,8 +297,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
             for ($j = 1; $j <= $DatiRiepilogoCount; $j++) {
                 $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/AliquotaIVA");
                 // Da verificare
-                $Arrotondamento = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Arrotondamento");
-                $Arrotondamento = floatval($Arrotondamento);
+                $Arrotondamento = 0.00;
                 $PrezzoTotale = 0.00;
                 $ImportoContributoCassa = 0.00;
                 $ImponibileImporto = 0.00;
@@ -313,6 +312,10 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                     $ImponibileImportoY = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$k]/ImponibileImporto");
                     $ImponibileImportoY = floatval($ImponibileImportoY);
                     $ImponibileImporto += $ImponibileImportoY;
+
+                    $ArrotondamentoY = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$k]/Arrotondamento");
+                    $ArrotondamentoY = floatval($ArrotondamentoY);
+                    $Arrotondamento += $ArrotondamentoY;
                 }
 
                 for ($k = 1; $k <= $DettaglioLineeCount; $k++) {
@@ -346,8 +349,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $ImponibileImportoExpected = \round($ImponibileImportoExpected, 2);
                 $diff = round(abs($ImponibileImportoExpected - $ImponibileImporto), 2);
 
-
-                if ($diff > 0.01) {
+                if ($diff > 1) {
                     $errors[ErrorCodes::FPR12_00422] = "2.2.2.5 <ImponibileImporto> non calcolato secondo le regole definite nelle specifiche tecniche";
                 }
             }
@@ -383,18 +385,18 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                         }
                     } else {
                         $Percentuale = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/ScontoMaggiorazione[$k]/Percentuale");
-                        $Percentuale = floatval($Percentuale);
+                        $Percentuale = floatval($Percentuale) / 100;
                         if ($Tipo === "SC") {
-                            $ScontoMaggiorazioneImporto -= round($PrezzoUnitario * $Percentuale, 2);
+                            $ScontoMaggiorazioneImporto -= $PrezzoUnitario * $Percentuale;
                         } else {
-                            $ScontoMaggiorazioneImporto += round($PrezzoUnitario * $Percentuale, 2);
+                            $ScontoMaggiorazioneImporto += $PrezzoUnitario * $Percentuale;
                         }
                     }
                 }
                 $Quantita = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Quantita", 1);
                 $Quantita = floatval($Quantita);
                 $PrezzoTotaleExpected = ($PrezzoUnitario + $ScontoMaggiorazioneImporto) * $Quantita;
-                $PrezzoTotaleExpected = \round($PrezzoTotaleExpected, 2);
+                $PrezzoTotaleExpected = $PrezzoTotaleExpected;
                 if (abs($PrezzoTotaleExpected - $PrezzoTotale) > 0.01) {
                     $errors[ErrorCodes::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche";
                 }
