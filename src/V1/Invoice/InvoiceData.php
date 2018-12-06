@@ -286,4 +286,15 @@ class InvoiceData extends XmlWrapper
         return $proc->transformToXML($this->domDocument);
     }
 
+    public function applyXsl($xslPath)
+    {
+        $xsl = new \DOMDocument();
+        $xsl->load($xslPath);
+
+        $proc = new \XSLTProcessor();
+        $proc->importStyleSheet($xsl);
+
+        return $proc->transformToXML($this->domDocument);
+    }
+
 }
