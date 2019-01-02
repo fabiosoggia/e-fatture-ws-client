@@ -501,6 +501,29 @@ class XmlWrapper
     }
 
     /**
+     * Restituisce il (x)path di un nodo.
+     *
+     * @param DOMNode $node
+     * @return void
+     */
+    public function getNodePath($node)
+    {
+        $ancestors = $this->domXPath->query("ancestor::*", $node);
+        $nodePath = "";
+        for ($j = 0; $j < $ancestors->length + 1; $j++) {
+            $ancestor = ($j < $ancestors->length) ? $ancestors->item($j) : $node;
+            $ancestorTag = $ancestor->localName;
+            $n = $this->domXPath->evaluate("count(preceding-sibling::$ancestorTag)", $ancestor) + 1;
+            $n = intval($n);
+            $nodePath = $nodePath . "/$ancestorTag";
+            if ($n > 1) {
+                $nodePath = $nodePath . "[$n]";
+            }
+        }
+        return $nodePath;
+    }
+
+    /**
      * Restituisci i dati dell'xml come array associativo di path => valore.
      *
      * @return array
@@ -512,8 +535,9 @@ class XmlWrapper
         for ($i = 0; $i < $leafs->length; $i++) {
             $leaf = $leafs->item($i);
             // TODO: getNodePath() potrebbe restituire dei path inattesi
-            $leafPath = $leaf->getNodePath();
-            $leafPath = preg_replace('/[^\/]*:/', '', $leafPath);
+            // $leafPath = $leaf->getNodePath();
+            // $leafPath = preg_replace('/[^\/]*:/', '', $leafPath);
+            $leafPath = $this->getNodePath($leaf);
             $data[$leafPath] = $this->get($leafPath);
         }
 
