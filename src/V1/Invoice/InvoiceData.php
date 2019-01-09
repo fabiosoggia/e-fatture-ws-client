@@ -49,7 +49,7 @@ class InvoiceData extends XmlWrapper
 
         $domDocument = new \DOMDocument();
         try {
-            $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT);
+            $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT | LIBXML_NOWARNING | LIBXML_NOERROR);
         } catch (\Exception $ex) {
             $error = sprintf("Invalid invoice XML: %s.", $ex->getMessage());
             throw new InvalidXml($error, $ex->getCode());
