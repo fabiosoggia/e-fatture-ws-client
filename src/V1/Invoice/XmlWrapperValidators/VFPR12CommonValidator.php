@@ -371,7 +371,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $PrezzoTotale = floatval($PrezzoTotale);
                 $PrezzoUnitario = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/PrezzoUnitario");
                 $PrezzoUnitario = floatval($PrezzoUnitario);
-                $ScontoMaggiorazioneImporto = 0.00;
+                $PrezzoUnitarioComputed = $PrezzoUnitario;
                 $ScontoMaggiorazioneCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/ScontoMaggiorazione");
                 for ($k = 1; $k <= $ScontoMaggiorazioneCount; $k++) {
                     $Tipo = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/ScontoMaggiorazione[$k]/Tipo");
@@ -379,26 +379,25 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                     if ($Importo !== null) {
                         $Importo = floatval($Importo);
                         if ($Tipo === "SC") {
-                            $ScontoMaggiorazioneImporto -= $Importo;
+                            $PrezzoUnitarioComputed -= $Importo;
                         } else {
-                            $ScontoMaggiorazioneImporto += $Importo;
+                            $PrezzoUnitarioComputed += $Importo;
                         }
                     } else {
                         $Percentuale = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/ScontoMaggiorazione[$k]/Percentuale");
                         $Percentuale = floatval($Percentuale) / 100;
                         if ($Tipo === "SC") {
-                            $ScontoMaggiorazioneImporto -= $PrezzoUnitario * $Percentuale;
+                            $PrezzoUnitarioComputed -= $PrezzoUnitarioComputed * $Percentuale;
                         } else {
-                            $ScontoMaggiorazioneImporto += $PrezzoUnitario * $Percentuale;
+                            $PrezzoUnitarioComputed += $PrezzoUnitarioComputed * $Percentuale;
                         }
                     }
                 }
                 $Quantita = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Quantita", 1);
                 $Quantita = floatval($Quantita);
-                $PrezzoTotaleExpected = ($PrezzoUnitario + $ScontoMaggiorazioneImporto) * $Quantita;
-                $PrezzoTotaleExpected = $PrezzoTotaleExpected;
+                $PrezzoTotaleExpected = $PrezzoUnitarioComputed * $Quantita;
                 if (abs($PrezzoTotaleExpected - $PrezzoTotale) > 0.01) {
-                    $errors[ErrorCodes::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche";
+                    $errors[ErrorCodes::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche (atteso: $PrezzoTotaleExpected dichiarato: $PrezzoTotale).";
                 }
             }
         }
