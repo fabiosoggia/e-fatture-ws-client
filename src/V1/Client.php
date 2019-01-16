@@ -21,7 +21,7 @@ class Client
     private $privateKey;
 
     public $endpoint = "https://stg-ws-sdi.cloudfinancegroup.com:8443/api/v1/";
-    public $timeout = 5.0;
+    public $timeout = 120.0;
     public $verify = true;
 
     public function setUuid($uuid)
