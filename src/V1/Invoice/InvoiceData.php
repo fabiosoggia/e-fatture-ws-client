@@ -89,8 +89,11 @@ class InvoiceData extends XmlWrapper
 
             foreach ($matches as $match) {
                 $value = $data[$match];
-                if (empty($value)) {
-                    continue;
+
+                if (!is_numeric($value)) {
+                    if (empty($value)) {
+                        continue;
+                    }
                 }
 
                 parent::set($match, $data[$match]);
@@ -173,11 +176,11 @@ class InvoiceData extends XmlWrapper
         $idPaese = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $idCodice = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 
-        if (empty($idPaese)) {
+        if ($idPaese === null) {
             throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdPaese' field.");
         }
 
-        if (empty($idCodice)) {
+        if ($idCodice === null) {
             throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdCodice' field.");
         }
 
@@ -190,7 +193,7 @@ class InvoiceData extends XmlWrapper
         $idPaese = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
         $idCodice = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
 
-        if (empty($idPaese) || empty($idCodice)) {
+        if (($idPaese === null) || ($idCodice === null)) {
             return null;
         }
 

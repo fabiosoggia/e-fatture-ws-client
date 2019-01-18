@@ -315,7 +315,7 @@ class XmlWrapper
             throw new \InvalidArgumentException($message);
         }
 
-        if (empty($this->get($path))) {
+        if ($this->get($path) === null) {
             return false;
         }
         return true;
@@ -347,6 +347,9 @@ class XmlWrapper
         }
         $node = $nodes->item(0);
         $value = \trim($node->nodeValue);
+        if (is_numeric($value)) {
+            return $value;
+        }
         if (empty($value)) {
             return $default;
         }
