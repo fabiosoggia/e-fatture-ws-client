@@ -77,16 +77,16 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         for ($i = 1; $i <= $FatturaElettronicaBodyCount; $i++) {
             $DettaglioLineeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee");
             for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
-                $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/AliquotaIVA");
+                $AliquotaIVA = floatval($xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/AliquotaIVA"));
                 $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Natura");
-                if ($AliquotaIVA === "0.00") {
+                if ($AliquotaIVA === 0.00) {
                     if (empty($Natura)) {
-                        $errors[ErrorCodes::FPR12_00400] = "2.2.1.14 <Natura> non presente a fronte di 2.2.1.12 <AliquotaIVA> pari a zero";
+                        $errors[ErrorCodes::FPR12_00400] = "2.2.1.14 <Natura> $Natura non presente a fronte di 2.2.1.12 <AliquotaIVA> $AliquotaIVA pari a zero";
                     }
                 }
                 if (!empty($Natura)) {
-                    if ($AliquotaIVA !== "0.00") {
-                        $errors[ErrorCodes::FPR12_00401] = "2.2.1.14 <Natura> presente a fronte di 2.2.1.12 <AliquotaIVA> diversa da zero";
+                    if ($AliquotaIVA !== 0.00) {
+                        $errors[ErrorCodes::FPR12_00401] = "2.2.1.14 <Natura> $Natura presente a fronte di 2.2.1.12 <AliquotaIVA> $AliquotaIVA diversa da zero";
                     }
                 }
             }
@@ -464,13 +464,13 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         for ($i = 1; $i <= $FatturaElettronicaBodyCount; $i++) {
             $DatiRiepilogoCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo");
             for ($j = 1; $j <= $DatiRiepilogoCount; $j++) {
-                $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/AliquotaIVA");
+                $AliquotaIVA = floatval($xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/AliquotaIVA"));
                 $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Natura");
-                if (($AliquotaIVA === "0.00") && empty($Natura)) {
-                    $errors[ErrorCodes::FPR12_00429] = "2.2.2.2 <Natura> non presente a fronte di 2.2.2.1 <AliquotaIVA> pari a zero (nei <DatiRiepilogo>, l'indicazione di un'aliquota IVA pari a zero obbliga all'indicazione della natura che giustifichi la non imponibilità)";
+                if (($AliquotaIVA === 0.00) && empty($Natura)) {
+                    $errors[ErrorCodes::FPR12_00429] = "2.2.2.2 <Natura> $Natura non presente a fronte di 2.2.2.1 <AliquotaIVA> $AliquotaIVA pari a zero (nei <DatiRiepilogo>, l'indicazione di un'aliquota IVA pari a zero obbliga all'indicazione della natura che giustifichi la non imponibilità)";
                 }
-                if (($AliquotaIVA !== "0.00") && !empty($Natura)) {
-                    $errors[ErrorCodes::FPR12_00430] = "2.2.2.2 <Natura> presente a fronte di 2.2.2.1 <AliquotaIVA> diversa da zero (l'indicazione di un'aliquota IVA diversa da zero qualifica i dati di riepilogo come dati riferiti ad operazioni imponibili e quindi non è ammessa la presenza dell'elemento <Natura>)";
+                if (($AliquotaIVA !== 0.00) && !empty($Natura)) {
+                    $errors[ErrorCodes::FPR12_00430] = "2.2.2.2 <Natura> $Natura presente a fronte di 2.2.2.1 <AliquotaIVA> $AliquotaIVA diversa da zero (l'indicazione di un'aliquota IVA diversa da zero qualifica i dati di riepilogo come dati riferiti ad operazioni imponibili e quindi non è ammessa la presenza dell'elemento <Natura>)";
                 }
             }
         }
