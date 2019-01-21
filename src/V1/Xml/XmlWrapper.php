@@ -321,6 +321,29 @@ class XmlWrapper
         return true;
     }
 
+    public function hasValue($path)
+    {
+        return $this->has($path);
+    }
+
+    public function hasNode($path)
+    {
+        if (!is_string($path)) {
+            $givenType = (\is_object($path)) ? get_class($path) : gettype($path);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $path = $this->normalizePath($path);
+        $node = $this->retrieveNode($path, false);
+
+        if ($node === null) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Questo metodo restituisce il contenuto presente in $path. Se non è
      * presente nessun contenuto restituisce $default.
