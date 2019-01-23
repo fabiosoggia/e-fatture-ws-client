@@ -71,10 +71,11 @@ class InvoiceData extends XmlWrapper
         $data = $this->toArray();
 
         // Pulisci il documento attuale
-        $this->domDocument->documentElement->nodeValue = "";
-        while ($this->domDocument->documentElement->childNodes->length > 0) {
-            $this->domDocument->documentElement->removeChild($this->domDocument->documentElement->childNodes->item(0));
-        }
+        $copy = ($formato === self::FATTURA_FSM) ? self::createFSM10() : self::create();
+        $this->domDocument = $copy->domDocument;
+        $this->rootNode = $copy->rootNode;
+        $this->rootNodeTag = $copy->rootNodeTag;
+        $this->domXPath = $copy->domXPath;
 
         // Rigenera il documento secondo l'ordinamento definito in $map
         $map = ($formato === self::FATTURA_FSM) ? FSM10Map::get() : FPR12Map::get();
@@ -99,6 +100,8 @@ class InvoiceData extends XmlWrapper
                 parent::set($match, $data[$match]);
             }
         }
+
+        $this->setVersione($formato);
     }
 
     /**
