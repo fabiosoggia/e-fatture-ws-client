@@ -281,8 +281,8 @@ class XmlWrapper
         }
         if (!is_string($value)) {
             $givenType = (\is_object($value)) ? get_class($value) : gettype($value);
-            $message = "Argument %d passed to %s() must be of the type %s, %s given";
-            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            $message = "Argument %d passed to %s() for '%s' must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, $path, "string", $givenType);
             throw new \InvalidArgumentException($message);
         }
 
