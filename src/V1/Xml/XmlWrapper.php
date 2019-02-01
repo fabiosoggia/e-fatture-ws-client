@@ -25,12 +25,13 @@ class XmlWrapper
         $this->domDocument = $domDocument;
         $this->domXPath = new DOMXPath($this->domDocument);
         $this->rootNode = $this->domDocument->documentElement;
-        $this->rootNodeTag = $this->rootNode->localName;
-        $this->validators = [];
 
         if ($this->rootNode === null) {
             throw new EFattureWsClientException("Invalid DOMDocument: missing root node.");
         }
+
+        $this->rootNodeTag = $this->rootNode->localName;
+        $this->validators = [];
     }
 
     public function addValidator(XmlWrapperValidator $validator)
