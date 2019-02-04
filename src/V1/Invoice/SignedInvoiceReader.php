@@ -95,8 +95,12 @@ class SignedInvoiceReader
 
         $domDocument = new \DomDocument();
         try {
-            $domDocument->loadXML($content);
+            $domDocument->loadXML($content, LIBXML_NOBLANKS | LIBXML_COMPACT | LIBXML_NOWARNING | LIBXML_NOERROR);
         } catch (\Exception $ex) {
+            return false;
+        }
+
+        if ($domDocument->documentElement === null) {
             return false;
         }
 
