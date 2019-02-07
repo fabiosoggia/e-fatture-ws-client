@@ -258,7 +258,9 @@ class Client
         // Compila campi "obbligatori"
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", \str_repeat("0", 28));
-        $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio", \str_repeat("0", 10));
+        if (!$invoice->hasValue("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio")) {
+            $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/ProgressivoInvio", \str_repeat("0", 10));
+        }
 
         // Valida contenuto della fattura
         $invoice->normalize();
