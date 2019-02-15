@@ -70,7 +70,7 @@ class SignedInvoiceReader
         }
 
         $domDocument = new \DomDocument();
-        $domDocument->loadXML($content);
+        $domDocument->loadXML($content, LIBXML_NOBLANKS | LIBXML_COMPACT | LIBXML_NOWARNING | LIBXML_NOERROR);
         $nodes = $domDocument->getElementsByTagNameNS("http://www.w3.org/2000/09/xmldsig#", "Signature");
         foreach ($nodes as $node) {
             $node->parentNode->removeChild($node);
