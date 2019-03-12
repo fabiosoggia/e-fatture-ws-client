@@ -297,7 +297,7 @@ class Client
         $invoice->validate();
 
         $signingMethod = $signedInvoiceReader->getSigningMethod();
-        $signedInvoiceXml = base64_encode($signedInvoiceReader->getFileSignedContent());
+        $signedInvoiceXml = $signedInvoiceReader->getFileSignedContent();
 
         if (\strlen($signedInvoiceXml) > 4718592) {
             throw new ApiRequestException("The invoice size is bigger than 5MB.", ErrorCodes::FPR12_00003_MSG);
@@ -305,7 +305,7 @@ class Client
 
         $payload = [
             "signingMethod" => $signingMethod,
-            "signedInvoiceXml" => $signedInvoiceXml
+            "signedInvoiceXml" => base64_encode($signedInvoiceXml)
         ];
         $response = $this->executeHttpRequest("files", $payload);
         return $response;
