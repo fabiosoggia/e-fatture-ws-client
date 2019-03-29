@@ -369,6 +369,9 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
             for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
                 $PrezzoTotale = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/PrezzoTotale");
                 $PrezzoTotale = floatval($PrezzoTotale);
+                if ($PrezzoTotale == 0) {
+                    continue;
+                }
                 $PrezzoUnitario = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/PrezzoUnitario");
                 $PrezzoUnitario = floatval($PrezzoUnitario);
                 $PrezzoUnitarioComputed = $PrezzoUnitario;
