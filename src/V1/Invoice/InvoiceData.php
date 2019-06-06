@@ -303,4 +303,18 @@ class InvoiceData extends XmlWrapper
         return $proc->transformToXML($this->domDocument);
     }
 
+    /**
+     * Come getFingerprint() ma non tinene conto degli allegati presenti nel
+     * file XML.
+     *
+     * @return string
+     */
+    public function getSoftFingerprint()
+    {
+        $xml = $this->saveXML();
+        $xml = preg_replace('/<([^<]+:)?Allegati.*<\/([^<]+:)?Allegati>/i', '', $xml);
+        $xml = \strtolower($xml);
+        $fingerprint = \md5($xml);
+        return $fingerprint;
+    }
 }
