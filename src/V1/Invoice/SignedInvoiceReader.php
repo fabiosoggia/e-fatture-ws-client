@@ -9,6 +9,7 @@ class SignedInvoiceReader
 {
     private $filePlainContent;
     private $filePlainFingerprint;
+    private $filePlainSoftFingerprint;
 
     private $fileSignedContent;
     private $fileSignedFingerprint;
@@ -219,6 +220,7 @@ class SignedInvoiceReader
 
         $invoice->fileSignedFingerprint = \md5(\strtolower($invoice->fileSignedContent));
         $invoice->filePlainFingerprint = $invoice->getInvoiceData()->getFingerprint();
+        $invoice->filePlainSoftFingerprint = $invoice->getInvoiceData()->getSoftFingerprint();
         return $invoice;
     }
 
@@ -240,6 +242,11 @@ class SignedInvoiceReader
     public function getFilePlainFingerprint()
     {
         return $this->filePlainFingerprint;
+    }
+
+    public function getFilePlainSoftFingerprint()
+    {
+        return $this->filePlainSoftFingerprint;
     }
 
     public function getFileSignedFingerprint()
