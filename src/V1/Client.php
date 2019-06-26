@@ -358,14 +358,14 @@ class Client
 
         $kind = \strtolower(\trim($kind));
         if (!in_array($kind, ["cf", "piva"])) {
-            throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva'.", ErrorCodes::SYS_00003);
+            throw new ApiRequestException("Field 'kind' must be 'cf' or 'piva', value '$kind' given.", ErrorCodes::SYS_00003);
         }
 
         $idPaese = \strtoupper(\trim($idPaese));
         try {
             (new ISO3166)->alpha2($idPaese);
         } catch (\Exception $ex) {
-            throw new ApiRequestException("Field 'kind' is not a valid ISO3166 country code.", ErrorCodes::SYS_00003);
+            throw new ApiRequestException("Value '$idPaese' is not a valid ISO3166 country code.", ErrorCodes::SYS_00003);
         }
 
         $codice = \strtolower(\trim($codice));
@@ -373,7 +373,7 @@ class Client
             throw new ApiRequestException("Field 'codice' is empty.", ErrorCodes::SYS_00003);
         }
         if (strlen($codice) > 28) {
-            throw new ApiRequestException("Field 'codice' is longer than 28 characters.", ErrorCodes::SYS_00003);
+            throw new ApiRequestException("Field 'codice' is longer than 28 characters, value '$codice' given.", ErrorCodes::SYS_00003);
         }
 
         $payload = [
