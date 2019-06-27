@@ -172,6 +172,10 @@ class Client
 
         $responseJson = json_decode($responseBody, true);
         if ($responseJson === null) {
+            if (($request === null) || ($response === null)) {
+                throw new EFattureWsClientException("Unable to parse response:\n\n$responseBody");
+            }
+
             throw new RequestException(
                 "Unable to parse response:\n\n$responseBody",
                 $request,
