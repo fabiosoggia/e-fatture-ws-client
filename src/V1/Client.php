@@ -252,12 +252,14 @@ class Client
      * @param InvoiceData $invoice
      * @return array
      */
-    public function sendInvoice(InvoiceData $invoice, $username = "", $password = "")
+    public function sendInvoice(InvoiceData $invoice, $sign = true, $username = "", $password = "")
     {
         $format = $invoice->getFormatoTrasmissione();
         if ($format === InvoiceData::FATTURA_FSM) {
             throw new ApiRequestException("The invoice format can't be FSM10.", ErrorCodes::FPR12_00200);
         }
+
+        $sign = boolval($sign);
 
         // Compila campi "obbligatori"
         $invoice->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese", "IT");
@@ -274,6 +276,7 @@ class Client
         $invoiceXml = $invoice->saveXML();
         $payload = [
             "invoiceXml" => $invoiceXml,
+            "sign" => $sign,
             "username" => $username,
             "password" => $password,
         ];
