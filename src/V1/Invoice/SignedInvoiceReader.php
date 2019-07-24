@@ -3,6 +3,7 @@
 namespace CloudFinance\EFattureWsClient\V1\Invoice;
 
 use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use CloudFinance\EFattureWsClient\Exceptions\InvalidSignedFile;
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 
 class SignedInvoiceReader
@@ -202,7 +203,7 @@ class SignedInvoiceReader
 
         if ($signingMethod === self::XAdES_BES) {
             if (!self::isXadESBESSigned($string)) {
-                throw new EFattureWsClientException("Invalid XAdES-BES file.");
+                throw new InvalidSignedFile("Invalid XAdES-BES file.");
             }
 
             $invoice->filePlainContent = self::removeXadESBESSignature($string);
@@ -213,7 +214,7 @@ class SignedInvoiceReader
         $invoice->signingMethod = $signingMethod;
 
         if (empty($invoice->filePlainContent)) {
-            throw new EFattureWsClientException("Invalid CAdES-BES file.");
+            throw new InvalidSignedFile("Invalid CAdES-BES file.");
         }
 
         $invoice->invoiceData = InvoiceData::loadXML($invoice->getFilePlainContent());
