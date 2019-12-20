@@ -441,4 +441,33 @@ class Client
         $response = $this->executeHttpRequest("files", $payload, "GET");
         return $response;
     }
+
+    /**
+     * @param string $codice
+     * @param string $codiceFiscale
+     * @return CloudFinance\EFattureWsClient\V1\RequestBuilder
+     */
+    public function invoiceFiles($codice, $codiceFiscale)
+    {
+        if (!is_string($codice)) {
+            $givenType = (\is_object($codice)) ? get_class($codice) : gettype($codice);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        if (!is_string($codiceFiscale)) {
+            $givenType = (\is_object($codiceFiscale)) ? get_class($codiceFiscale) : gettype($codiceFiscale);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $payload = [
+            "codice" => $codice . "",
+            "codiceFiscale" => $codiceFiscale . "",
+        ];
+
+        return new RequestBuilder($this, "invoices", $payload, "GET");
+    }
 }
