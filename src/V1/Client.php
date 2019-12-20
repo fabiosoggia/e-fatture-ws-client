@@ -11,7 +11,6 @@ use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\V1\Invoice\NotificaEsito;
 use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\TransferException;
 use League\ISO3166\ISO3166;
 use CloudFinance\EFattureWsClient\V1\Enum\WebhookMessages;
 
@@ -159,7 +158,7 @@ class Client
 
         try {
             $response = $client->request($method, $command, $options);
-        } catch (TransferException $ex) {
+        } catch (RequestException $ex) {
             if (!$ex->hasResponse()) {
                 throw $ex;
             }
