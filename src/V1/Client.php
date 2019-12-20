@@ -490,4 +490,30 @@ class Client
 
         return new RequestBuilder($this, "notifications", $payload, "GET");
     }
+
+    public function updateWebhook($webhookId, $webhookData)
+    {
+        if (!is_int($webhookId)) {
+            $givenType = (\is_object($webhookId)) ? get_class($webhookId) : gettype($webhookId);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "int", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        if (!is_array($webhookData)) {
+            $givenType = (\is_object($webhookData)) ? get_class($webhookData) : gettype($webhookData);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 2, __METHOD__, "array", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $webhookData = array_replace([
+            "completed" => 1,
+        ], $webhookData);
+
+        $webhookData["id"] = $webhookId;
+
+        $response = $this->executeHttpRequest("webhooks", $webhookData, "POST");
+        return $response;
+    }
 }
