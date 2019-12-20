@@ -470,4 +470,24 @@ class Client
 
         return new RequestBuilder($this, "invoices", $payload, "GET");
     }
+
+    /**
+     * @param int $sdiInvoiceFileId
+     * @return CloudFinance\EFattureWsClient\V1\RequestBuilder
+     */
+    public function invoiceFileNotifications($sdiInvoiceFileId)
+    {
+        if (!is_int($sdiInvoiceFileId)) {
+            $givenType = (\is_object($sdiInvoiceFileId)) ? get_class($sdiInvoiceFileId) : gettype($sdiInvoiceFileId);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "int", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $payload = [
+            "sdi_invoice_file_id" => $sdiInvoiceFileId,
+        ];
+
+        return new RequestBuilder($this, "notifications", $payload, "GET");
+    }
 }
