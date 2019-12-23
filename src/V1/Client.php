@@ -445,7 +445,7 @@ class Client
     /**
      * @param string $codice
      * @param string $codiceFiscale
-     * @return CloudFinance\EFattureWsClient\V1\RequestBuilder
+     * @return \CloudFinance\EFattureWsClient\V1\RequestBuilder
      */
     public function invoiceFiles($codice, $codiceFiscale)
     {
@@ -473,7 +473,7 @@ class Client
 
     /**
      * @param int $sdiInvoiceFileId
-     * @return CloudFinance\EFattureWsClient\V1\RequestBuilder
+     * @return \CloudFinance\EFattureWsClient\V1\RequestBuilder
      */
     public function notificationFiles($sdiInvoiceFileId)
     {
