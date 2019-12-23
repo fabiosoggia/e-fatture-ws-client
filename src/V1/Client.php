@@ -475,7 +475,7 @@ class Client
      * @param int $sdiInvoiceFileId
      * @return CloudFinance\EFattureWsClient\V1\RequestBuilder
      */
-    public function invoiceFileNotifications($sdiInvoiceFileId)
+    public function notificationFiles($sdiInvoiceFileId)
     {
         if (!is_int($sdiInvoiceFileId)) {
             $givenType = (\is_object($sdiInvoiceFileId)) ? get_class($sdiInvoiceFileId) : gettype($sdiInvoiceFileId);
