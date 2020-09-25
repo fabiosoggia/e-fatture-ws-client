@@ -2,6 +2,7 @@
 
 namespace CloudFinance\EFattureWsClient\Tests;
 
+use CloudFinance\EFattureWsClient\Exceptions\InvalidXml;
 use PHPUnit\Framework\TestCase;
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 
@@ -275,5 +276,155 @@ class InvoiceDataTest extends TestCase
         $invoice = InvoiceData::loadXML($xml);
         $invoice->normalize();
         $this->assertNotEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
+    }
+
+    public function testFormatoInvalidTag()
+    {
+        $this->expectException(InvalidXml::class);
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
+            <FatturaElettronicaHeader>
+                <DatiTrasmissione>
+                <InvalidTag>
+                    <IdPaese1>IT</IdPaese1>
+                    <IdCodice>000000</IdCodice>
+                </InvalidTag>
+                </DatiTrasmissione>
+            </FatturaElettronicaHeader>
+            </p:FatturaElettronica>';
+        $invoice = InvoiceData::loadXML($xml);
+        $invoice->validate();
+    }
+
+    public function testFormatoValid()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12" SistemaEmittente="SISTEMTEST">
+                <FatturaElettronicaHeader>
+                    <DatiTrasmissione>
+                        <IdTrasmittente>
+                            <IdPaese>IT</IdPaese>
+                            <IdCodice>00000000000</IdCodice>
+                        </IdTrasmittente>
+                        <ProgressivoInvio>0000000000</ProgressivoInvio>
+                        <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+                        <CodiceDestinatario>0000000</CodiceDestinatario>
+                        <ContattiTrasmittente>
+                            <Telefono>0000000000</Telefono>
+                            <Email>test@email.it</Email>
+                        </ContattiTrasmittente>
+                    </DatiTrasmissione>
+                    <CedentePrestatore>
+                        <DatiAnagrafici>
+                            <IdFiscaleIVA>
+                                <IdPaese>IT</IdPaese>
+                                <IdCodice>00000000000</IdCodice>
+                            </IdFiscaleIVA>
+                            <CodiceFiscale>00000000000</CodiceFiscale>
+                            <Anagrafica>
+                                <Denominazione>Cedente prestatore</Denominazione>
+                            </Anagrafica>
+                            <RegimeFiscale>RF01</RegimeFiscale>
+                        </DatiAnagrafici>
+                        <Sede>
+                            <Indirizzo>Via Roma</Indirizzo>
+                            <CAP>00100</CAP>
+                            <Comune>Roma</Comune>
+                            <Provincia>RM</Provincia>
+                            <Nazione>IT</Nazione>
+                        </Sede>
+                        <Contatti>
+                            <Telefono>1234567890</Telefono>
+                        </Contatti>
+                    </CedentePrestatore>
+                    <CessionarioCommittente>
+                        <DatiAnagrafici>
+                            <IdFiscaleIVA>
+                                <IdPaese>IT</IdPaese>
+                                <IdCodice>00000000000</IdCodice>
+                            </IdFiscaleIVA>
+                            <CodiceFiscale>00000000000</CodiceFiscale>
+                            <Anagrafica>
+                                <Denominazione>Cessionario committente</Denominazione>
+                            </Anagrafica>
+                        </DatiAnagrafici>
+                        <Sede>
+                            <Indirizzo>Via Roma</Indirizzo>
+                            <CAP>00100</CAP>
+                            <Comune>Roma</Comune>
+                            <Provincia>RM</Provincia>
+                            <Nazione>IT</Nazione>
+                        </Sede>
+                    </CessionarioCommittente>
+                    <TerzoIntermediarioOSoggettoEmittente>
+                        <DatiAnagrafici>
+                            <IdFiscaleIVA>
+                                <IdPaese>IT</IdPaese>
+                                <IdCodice>00000000000</IdCodice>
+                            </IdFiscaleIVA>
+                            <CodiceFiscale>00000000000</CodiceFiscale>
+                            <Anagrafica>
+                                <Denominazione>Terzo intermediario o soggetto emittente</Denominazione>
+                            </Anagrafica>
+                        </DatiAnagrafici>
+                    </TerzoIntermediarioOSoggettoEmittente>
+                    <SoggettoEmittente>TZ</SoggettoEmittente>
+                </FatturaElettronicaHeader>
+                <FatturaElettronicaBody>
+                    <DatiGenerali>
+                        <DatiGeneraliDocumento>
+                            <TipoDocumento>TD01</TipoDocumento>
+                            <Divisa>EUR</Divisa>
+                            <Data>2020-09-23</Data>
+                            <Numero>2</Numero>
+                            <DatiRitenuta>
+                                <TipoRitenuta>RT01</TipoRitenuta>
+                                <ImportoRitenuta>36.00</ImportoRitenuta>
+                                <AliquotaRitenuta>20.00</AliquotaRitenuta>
+                                <CausalePagamento>A</CausalePagamento>
+                            </DatiRitenuta>
+                            <DatiRitenuta>
+                                <TipoRitenuta>RT04</TipoRitenuta>
+                                <ImportoRitenuta>20.00</ImportoRitenuta>
+                                <AliquotaRitenuta>20.00</AliquotaRitenuta>
+                                <CausalePagamento>T</CausalePagamento>
+                            </DatiRitenuta>
+                            <ImportoTotaleDocumento>244.00</ImportoTotaleDocumento>
+                            <Arrotondamento>0.00</Arrotondamento>
+                        </DatiGeneraliDocumento>
+                    </DatiGenerali>
+                    <DatiBeniServizi>
+                        <DettaglioLinee>
+                            <NumeroLinea>1</NumeroLinea>
+                            <Descrizione>Modello 730</Descrizione>
+                            <Quantita>1.00000000</Quantita>
+                            <PrezzoUnitario>200.00000000</PrezzoUnitario>
+                            <PrezzoTotale>200.00000000</PrezzoTotale>
+                            <AliquotaIVA>22.00</AliquotaIVA>
+                            <Ritenuta>SI</Ritenuta>
+                        </DettaglioLinee>
+                        <DatiRiepilogo>
+                            <AliquotaIVA>22.00</AliquotaIVA>
+                            <SpeseAccessorie>0.00</SpeseAccessorie>
+                            <Arrotondamento>0.00000000</Arrotondamento>
+                            <ImponibileImporto>200.00</ImponibileImporto>
+                            <Imposta>44.00</Imposta>
+                            <EsigibilitaIVA>I</EsigibilitaIVA>
+                        </DatiRiepilogo>
+                        <DatiRiepilogo>
+                            <AliquotaIVA>0.00</AliquotaIVA>
+                            <Natura>N3</Natura>
+                            <SpeseAccessorie>0.00</SpeseAccessorie>
+                            <Arrotondamento>0.00000000</Arrotondamento>
+                            <ImponibileImporto>0.00</ImponibileImporto>
+                            <Imposta>0.00</Imposta>
+                        </DatiRiepilogo>
+                    </DatiBeniServizi>
+                </FatturaElettronicaBody>
+            </p:FatturaElettronica>';
+        $invoice = InvoiceData::loadXML($xml);
+        $this->assertNull(
+            $invoice->validate()
+        );
     }
 }
