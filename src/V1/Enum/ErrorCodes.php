@@ -227,6 +227,28 @@ class ErrorCodes {
     const FPR12_00438 = "00438";
     const FPR12_00438_MSG = "2.2.1.10.2 <Percentuale> e 2.2.1.10.3 <Importo> non presenti a fronte di 2.2.1.10.1 <Tipo> valorizzato (l'indicazione della presenza di uno sconto o di una maggiorazione, obbliga all'indicazione di almeno uno degli elementi <Percentuale> e <Importo> dello sconto/maggiorazione)";
 
+    // Gestito
+    const FPR12_00443 = "00443";
+    const FPR12_00443_MSG = "non c’è corrispondenza tra i valori indicati nell’elemento 2.2.1.12 <AliquotaIVA> o 2.1.1.7.5 <AliquotaIVA> e quelli dell’elemento 2.2.2.1 <AliquotaIVA>";
+
+    const FPR12_00444 = "00444";
+    const FPR12_00444_MSG = "non c’è corrispondenza tra i valori indicati nell’elemento 2.2.1.14 <Natura> o 2.1.1.7.7 <Natura> e quelli dell’elemento 2.2.2.2 <Natura>";
+
+    // Gestito
+    const FPR12_00471 = "00471";
+    const FPR12_00471_MSG = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> il cedente/prestatore non può essere uguale al cessionario/committente";
+
+    // Gestito
+    const FPR12_00472 = "00472";
+    const FPR12_00472_MSG = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> il cedente/prestatore deve essere uguale al cessionario/committente";
+
+    // Gestito
+    const FPR12_00473 = "00473";
+    const FPR12_00473_MSG = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> non è ammesso il valore IT nell’elemento 1.2.1.1.1 <IdPaese>";
+
+    // Gestito
+    const FPR12_00474 = "00474";
+    const FPR12_00474_MSG = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> non sono ammesse linee di dettaglio con l’elemento 2.2.1.12 <AliquotaIVA> contenente valore zero";
 
     // ---------------------------------------------------------------------- //
     //                    Errori di trasmissione notifica                     //

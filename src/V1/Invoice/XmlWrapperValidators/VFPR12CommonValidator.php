@@ -524,6 +524,89 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
         }
 
 
+        // Codice: 00443
+        // Descrizione: non c’è corrispondenza tra i valori indicati nell’elemento 2.2.1.14 <Natura>
+        // o 2.1.1.7.7 <Natura> e quelli dell’elemento 2.2.2.2 <Natura>.
+        $FatturaElettronicaBodyCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody");
+        for ($i = 1; $i <= $FatturaElettronicaBodyCount; $i++) {
+            $NatureInDatiRiepilogo = [];
+            $DatiRiepilogoCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo");
+            for ($j = 1; $j <= $DatiRiepilogoCount; $j++) {
+                $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DatiRiepilogo[$j]/Natura");
+                if ($Natura) {
+                    $NatureInDatiRiepilogo[] = $Natura;
+                }
+            }
+            $DatiCassaPrevidenzialeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale");
+            for ($j = 1; $j <= $DatiCassaPrevidenzialeCount; $j++) {
+                $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/DatiCassaPrevidenziale[$j]/Natura");
+                if (empty($Natura)) {
+                    continue;
+                }
+                if (in_array($Natura, $NatureInDatiRiepilogo)) {
+                    continue;
+                }
+                $errors[ErrorCodes::FPR12_00444] = "non c’è corrispondenza tra i valori indicati nell’elemento 2.2.1.14 <Natura> o 2.1.1.7.7 <Natura> e quelli dell’elemento 2.2.2.2 <Natura> (DatiCassaPrevidenziale $Natura)";
+            }
+            $DettaglioLineeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee");
+            for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
+                $Natura = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Natura");
+                if (empty($Natura)) {
+                    continue;
+                }
+                if (in_array($Natura, $NatureInDatiRiepilogo)) {
+                    continue;
+                }
+                $errors[ErrorCodes::FPR12_00444] = "non c’è corrispondenza tra i valori indicati nell’elemento 2.2.1.14 <Natura> o 2.1.1.7.7 <Natura> e quelli dell’elemento 2.2.2.2 <Natura> (DettaglioLinee $Natura)";
+            }
+        }
+
+
+        // Codice: 00471
+        // Descrizione: per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> il cedente/prestatore non può essere uguale al cessionario/committente
+        $FatturaElettronicaBodyCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody");
+        for ($i = 1; $i <= $FatturaElettronicaBodyCount; $i++) {
+            $TipoDocumento = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiGenerali/DatiGeneraliDocumento/TipoDocumento");
+            $IdCedente = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA");
+            $IdCessionario = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaHeader/CessionarioCommittente/DatiAnagrafici/IdFiscaleIVA");
+            $IdPaeseCedente = strtoupper($xmlWrapper->get("/FatturaElettronica/FatturaElettronicaHeader/CedentePrestatore/DatiAnagrafici/IdFiscaleIVA/IdPaese"));
+
+            if (!empty($IdCedente) && !empty($IdCessionario)) {
+                if (in_array($TipoDocumento, [ "TD16", "TD17", "TD18", "TD19", "TD20" ])) {
+                    if ($IdCedente === $IdCessionario) {
+                        $errors[ErrorCodes::FPR12_00471] = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> il cedente/prestatore non può essere uguale al cessionario/committente";
+                    }
+                }
+
+                if ($TipoDocumento === "TD21") {
+                    if ($IdCedente !== $IdCessionario) {
+                        $errors[ErrorCodes::FPR12_00472] = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> il cedente/prestatore deve essere uguale al cessionario/committente";
+                    }
+                }
+            }
+
+            if (in_array($TipoDocumento, [ "TD17", "TD18", "TD19" ])) {
+                if ($IdPaeseCedente === "IT") {
+                    $errors[ErrorCodes::FPR12_00473] = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> non è ammesso il valore IT nell’elemento 1.2.1.1.1 <IdPaese>";
+                }
+            }
+
+            if ($TipoDocumento === "TD20") {
+                $DettaglioLineeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee");
+                for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
+                    $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/AliquotaIVA");
+                    if ($AliquotaIVA === null) {
+                        continue;
+                    }
+                    $AliquotaIVA = floatval($AliquotaIVA);
+                    if ($AliquotaIVA == 0.0) {
+                        $errors[ErrorCodes::FPR12_00474] = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> non sono ammesse linee di dettaglio con l’elemento 2.2.1.12 <AliquotaIVA> contenente valore zero";
+                    }
+                }
+            }
+        }
+
+
         return $errors;
     }
 }
