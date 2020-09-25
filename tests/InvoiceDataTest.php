@@ -21,6 +21,7 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $builder = InvoiceData::loadXML($xml);
+        $builder->normalize();
         $this->assertXmlStringEqualsXmlString($builder->saveXML(true), '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
             <FatturaElettronicaHeader>
@@ -43,6 +44,7 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $builder = InvoiceData::loadXML($xml);
+        $builder->normalize();
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
                 <FatturaElettronicaHeader>
@@ -92,18 +94,6 @@ class InvoiceDataTest extends TestCase
             </p:FatturaElettronica>',
             $builder->saveXML(true),
             "Il metodo set() non ha modificato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
-
-        $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice", "");
-        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
-            <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
-            <FatturaElettronicaHeader>
-                <DatiTrasmissione>
-                <FormatoTrasmissione>FPR12</FormatoTrasmissione>
-                </DatiTrasmissione>
-            </FatturaElettronicaHeader>
-            </p:FatturaElettronica>',
-            $builder->saveXML(true),
-            "Il metodo set() non ha eliminato il tag /FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice.");
 
         $builder = InvoiceData::create(InvoiceData::FATTURA_B2B);
         $builder->set("/FatturaElettronica/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice[1]", "Test 04.1");
@@ -192,7 +182,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() ha generato una fingerprint diversa.");
+        $invoice->normalize();
+        $this->assertEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() ha generato una fingerprint diversa.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -206,7 +197,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto della posizione locale dei tag.");
+        $invoice->normalize();
+        $this->assertEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto della posizione locale dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -221,7 +213,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto dei tag vuoti.");
+        $invoice->normalize();
+        $this->assertEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto dei tag vuoti.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -236,7 +229,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto degli attributi dei tag.");
+        $invoice->normalize();
+        $this->assertEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() non deve tener conto degli attributi dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -250,7 +244,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del valori dei tag.");
+        $invoice->normalize();
+        $this->assertNotEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del valori dei tag.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -263,7 +258,8 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag mancanti.");
+        $invoice->normalize();
+        $this->assertNotEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag mancanti.");
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" versione="FPR12">
@@ -277,6 +273,7 @@ class InvoiceDataTest extends TestCase
             </FatturaElettronicaHeader>
             </p:FatturaElettronica>';
         $invoice = InvoiceData::loadXML($xml);
-        $this->assertNotEquals("723346d11997b975ffea2273eb99dadd", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
+        $invoice->normalize();
+        $this->assertNotEquals("706560b6473615386e8b7a92439a57a5", $invoice->getFingerprint(), "Il metodo getFingerprint() deve tener conto del dei tag con nomi diversi.");
     }
 }

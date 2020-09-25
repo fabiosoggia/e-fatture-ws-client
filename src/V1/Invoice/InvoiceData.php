@@ -71,6 +71,7 @@ class InvoiceData extends XmlWrapper
     public function orderTags()
     {
         $formato = $this->getFormatoTrasmissione();
+        $formato = empty($formato) ? $this->getVersione() : $formato;
 
         // Valori nodi attualmente presenti nel documento
         $data = $this->toArray();
