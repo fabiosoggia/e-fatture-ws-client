@@ -18,13 +18,18 @@ class InvoiceData extends XmlWrapper
     const FATTURA_B2B = "FPR12";
     const FATTURA_FSM = "FSM10";
 
-    public static function create()
+    public static function create($formato = NULL)
     {
         $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <p:FatturaElettronica xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" />';
         $domDocument = new \DOMDocument();
         $domDocument->loadXML($xml);
         $instance = new self($domDocument);
+
+        if (!empty($formato)) {
+            $instance->setFormatoTrasmissione($formato);
+        }
+
         return $instance;
     }
 
