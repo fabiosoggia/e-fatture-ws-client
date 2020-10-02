@@ -313,6 +313,7 @@ class InvoiceDataTest extends TestCase
                             <Telefono>0000000000</Telefono>
                             <Email>test@email.it</Email>
                         </ContattiTrasmittente>
+                        <PECDestinatario>test-test@test-test.it</PECDestinatario>
                     </DatiTrasmissione>
                     <CedentePrestatore>
                         <DatiAnagrafici>
