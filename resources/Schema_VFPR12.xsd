@@ -185,6 +185,8 @@
       <xs:enumeration value="W" />
       <xs:enumeration value="X" />
       <xs:enumeration value="Y" />
+      <!-- IL CODICE SEGUENTE (Z) E' STATO LASCIATO PER RETROCOMPATIBILITA' -->
+      <xs:enumeration value="Z" />
       <xs:enumeration value="L1" />
       <xs:enumeration value="M1" />
       <xs:enumeration value="M2" />
