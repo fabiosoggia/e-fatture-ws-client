@@ -11,6 +11,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12CommonVa
 use CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators\VFPR12DatesValidator;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidators\SchemaValidator;
+use DOMXPath;
 
 class InvoiceData extends XmlWrapper
 {
@@ -317,8 +318,19 @@ class InvoiceData extends XmlWrapper
      */
     public function getSoftFingerprint()
     {
-        $xml = $this->saveXML();
-        $xml = preg_replace('/<([^<]+:)?Allegati.*<\/([^<]+:)?Allegati>/i', '', $xml);
+        // $xml = $this->saveXML();
+        // $xml = preg_replace('/<([^<]+:)?Allegati.*<\/([^<]+:)?Allegati>/i', '', $xml);
+        // $xml = \strtolower($xml);
+        // $fingerprint = \md5($xml);
+        // return $fingerprint;
+
+        $dom = clone $this->getDomDocument();
+        $xpath = new DOMXPath($dom);
+        $allegati = $xpath->query("//Allegati");
+        foreach ($allegati as $allegato) {
+            $allegato->parentNode->removeChild($allegato);
+        }
+        $xml = $dom->saveXML();
         $xml = \strtolower($xml);
         $fingerprint = \md5($xml);
         return $fingerprint;
