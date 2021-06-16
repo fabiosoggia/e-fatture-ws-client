@@ -591,7 +591,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 }
             }
 
-            if ($TipoDocumento === "TD20") {
+            if ($TipoDocumento === "TD21") {
                 $DettaglioLineeCount = $xmlWrapper->count("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee");
                 for ($j = 1; $j <= $DettaglioLineeCount; $j++) {
                     $AliquotaIVA = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/AliquotaIVA");
