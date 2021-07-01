@@ -3,12 +3,13 @@
 namespace CloudFinance\EFattureWsClient\V1\Invoice\XmlWrapperValidators;
 
 use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
-use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapperValidator;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use DateTime;
 
 class VFPR12CommonValidator implements XmlWrapperValidator {
+
+    private const ONE_CENT = 0.0199999999;
 
     public function getErrors(XmlWrapper $xmlWrapper)
     {
@@ -270,7 +271,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $ImpostaExpected = round(($AliquotaIVA * $ImponibileImporto) / 100, 2);
                 $diff = round(abs($ImpostaExpected - $Imposta), 2);
 
-                if ($diff > 0.01) {
+                if ($diff > self::ONE_CENT) {
                     $errors[ErrorCodes::FPR12_00421] = "2.2.2.6 <Imposta> [$Imposta] non calcolato secondo le regole definite nelle specifiche tecniche (il valore dell'elemento <Imposta> deve essere uguale al risultato della seguente operazione: ( AliquotaIVA * ImponibileImporto ) ⁄ 100 ) [ ( $AliquotaIVA * $ImponibileImporto ) ⁄ 100 ) ] il risultato di questa operazione va arrotondato alla seconda cifra decimale, per difetto se la terza cifra decimale è inferiore a 5, per eccesso se uguale o superiore a 5; è ammessa la tolleranza di ±1 centesimo di euro)";
                 }
             }
@@ -399,7 +400,7 @@ class VFPR12CommonValidator implements XmlWrapperValidator {
                 $Quantita = $xmlWrapper->get("/FatturaElettronica/FatturaElettronicaBody[$i]/DatiBeniServizi/DettaglioLinee[$j]/Quantita", 1);
                 $Quantita = floatval($Quantita);
                 $PrezzoTotaleExpected = $PrezzoUnitarioComputed * $Quantita;
-                if (abs($PrezzoTotaleExpected - $PrezzoTotale) > 0.01) {
+                if (abs($PrezzoTotaleExpected - $PrezzoTotale) > self::ONE_CENT) {
                     $errors[ErrorCodes::FPR12_00423] = "2.2.1.11 <PrezzoTotale> non calcolato secondo le regole definite nelle specifiche tecniche (atteso: $PrezzoTotaleExpected dichiarato: $PrezzoTotale).";
                 }
             }
