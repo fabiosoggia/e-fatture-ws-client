@@ -140,7 +140,7 @@ class SignedInvoiceReader
             throw new EFattureWsClientException("Unable to write temporary files.");
         }
 
-        $openSslCommand = "openssl cms -verify -noverify -in '%s' -inform DER -out '%s'";
+        $openSslCommand = "openssl cms -verify -noverify -in '%s' -inform DER -out '%s' -no_attr_verify";
         $openSslCommand = \sprintf($openSslCommand, $fileSignedPath, $filePlainPath);
         $res = \exec($openSslCommand, $output);
         $filePlainContent = \file_get_contents($filePlainPath);
@@ -193,7 +193,7 @@ class SignedInvoiceReader
                 throw new EFattureWsClientException("Unable to write temporary files.");
             }
 
-            $openSslCommand = "openssl cms -verify -noverify -in '%s' -inform DER -out '%s'";
+            $openSslCommand = "openssl cms -verify -noverify -in '%s' -inform DER -out '%s' -no_attr_verify";
             $openSslCommand = \sprintf($openSslCommand, $fileSignedPath, $filePlainPath);
             $res = \exec($openSslCommand, $output);
             $invoice->filePlainContent = \file_get_contents($filePlainPath);
