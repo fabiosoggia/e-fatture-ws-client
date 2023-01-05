@@ -172,7 +172,7 @@ class XmlWrapper
         foreach ($tags as $token) {
             $res = preg_match($tagRegex, $token, $matches);
             if ($res === false) {
-                throw \Exception("Invalid regex.");
+                throw new \Exception("Invalid regex.");
             }
 
             if ($res === 0) {
