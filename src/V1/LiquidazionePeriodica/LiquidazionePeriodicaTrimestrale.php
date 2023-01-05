@@ -71,18 +71,13 @@ class LiquidazionePeriodicaTrimestrale extends XmlWrapper
             throw new \InvalidArgumentException($message);
         }
 
-        $idPaese = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdPaese");
-        $idCodice = $this->get("/FatturaElettronicaHeader/DatiTrasmissione/IdTrasmittente/IdCodice");
-
-        if ($idPaese === null) {
-            throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdPaese' field.");
-        }
+        $idCodice = $this->get("/Comunicazione/Frontespizio/CodiceFiscale");
 
         if ($idCodice === null) {
-            throw new EFattureWsClientException("Empty 'DatiTrasmissione/IdTrasmittente/IdCodice' field.");
+            throw new EFattureWsClientException("Empty 'Comunicazione/Frontespizio/CodiceFiscale' field.");
         }
 
-        $fileName = \strtoupper($idPaese . $idCodice) . $suffix;
+        $fileName = "IT" . \strtoupper($idCodice) . "_LI" . $suffix;
         return $fileName;
     }
 

@@ -112,4 +112,26 @@ class LiquidazionePeriodicaTrimestraleTest extends TestCase
         $this->assertEquals('IVP18', $builder->get('/Intestazione/CodiceFornitura'));
         $this->assertEquals('04143312345', $builder->get('/Comunicazione/Frontespizio/CodiceFiscale'));
     }
+
+    public function testGenerateFileName()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <Fornitura xmlns="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <Intestazione>
+                <CodiceFornitura>IVP18</CodiceFornitura>
+                <CodiceFiscaleDichiarante>TRNMRT75D01A783V</CodiceFiscaleDichiarante>
+                <CodiceCarica>1</CodiceCarica>
+            </Intestazione>
+            <Comunicazione>
+                <Frontespizio>
+                    <CodiceFiscale>01589730629</CodiceFiscale>
+                </Frontespizio>
+            </Comunicazione>
+        </Fornitura>';
+
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+
+        $this->assertEquals('IT01589730629_LI_12345', $builder->generateFileName("_12345"));
+
+    }
 }
