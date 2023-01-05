@@ -68,5 +68,48 @@ class LiquidazionePeriodicaTrimestraleTest extends TestCase
 
         $this->assertEquals('IVP18', $builder->get('/Intestazione/CodiceFornitura'));
         $this->assertEquals('01589730629', $builder->get('/Comunicazione/Frontespizio/CodiceFiscale'));
+
+
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+            <iv:Fornitura xmlns:sc="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:common" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:cm="urn:www.agenziaentrate.gov.it:specificheTecniche:common" xmlns:iv="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp">
+                <iv:Intestazione>
+                    <iv:CodiceFornitura>IVP18</iv:CodiceFornitura>
+                    <iv:CodiceFiscaleDichiarante>ANNBMM72B13F839G</iv:CodiceFiscaleDichiarante>
+                    <iv:CodiceCarica>1</iv:CodiceCarica>
+                </iv:Intestazione>
+                <iv:Comunicazione identificativo="00001">
+                    <iv:Frontespizio>
+                        <iv:CodiceFiscale>04143312345</iv:CodiceFiscale>
+                        <iv:AnnoImposta>2022</iv:AnnoImposta>
+                        <iv:PartitaIVA>04143312345</iv:PartitaIVA>
+                        <iv:CFDichiarante>ANNBMM72B13F839G</iv:CFDichiarante>
+                        <iv:CodiceCaricaDichiarante>1</iv:CodiceCaricaDichiarante>
+                        <iv:FirmaDichiarazione>1</iv:FirmaDichiarazione>
+                        <iv:CFIntermediario>CFFCFF67P19B963M</iv:CFIntermediario>
+                        <iv:ImpegnoPresentazione>1</iv:ImpegnoPresentazione>
+                        <iv:DataImpegno>04052022</iv:DataImpegno>
+                        <iv:FirmaIntermediario>1</iv:FirmaIntermediario>
+                        <iv:IdentificativoProdSoftware>10209790152</iv:IdentificativoProdSoftware>
+                    </iv:Frontespizio>
+                    <iv:DatiContabili>
+                        <iv:Modulo>
+                            <iv:NumeroModulo>1</iv:NumeroModulo>
+                            <iv:Trimestre>1</iv:Trimestre>
+                            <iv:TotaleOperazioniAttive>18066,49</iv:TotaleOperazioniAttive>
+                            <iv:TotaleOperazioniPassive>19558,81</iv:TotaleOperazioniPassive>
+                            <iv:IvaEsigibile>3974,65</iv:IvaEsigibile>
+                            <iv:IvaDetratta>3699,90</iv:IvaDetratta>
+                            <iv:IvaDovuta>274,75</iv:IvaDovuta>
+                            <iv:InteressiDovuti>2,75</iv:InteressiDovuti>
+                            <iv:ImportoDaVersare>277,50</iv:ImportoDaVersare>
+                        </iv:Modulo>
+                    </iv:DatiContabili>
+                </iv:Comunicazione>
+            </iv:Fornitura>';
+
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+
+        $this->assertEquals('IVP18', $builder->get('/Intestazione/CodiceFornitura'));
+        $this->assertEquals('04143312345', $builder->get('/Comunicazione/Frontespizio/CodiceFiscale'));
     }
 }

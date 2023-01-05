@@ -36,7 +36,14 @@ class LiquidazionePeriodicaTrimestrale extends XmlWrapper
             throw new \InvalidArgumentException($message);
         }
 
+        if (strpos($xml, 'xmlns="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp"') === false &&
+            strpos($xml, 'xmlns:iv="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp"') === false) {
+            throw new InvalidXml("Invalid XML: not supported 'xmlns:iv' namespace.", 0);
+        }
+
         $xml = str_replace('xmlns="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp"', '', $xml);
+        $xml = str_replace('xmlns:iv="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp"', '', $xml);
+        $xml = str_replace(['<iv:', '</iv:'], ['<', '</'], $xml);
         $domDocument = new \DOMDocument();
         try {
             $domDocument->loadXML($xml, LIBXML_NOBLANKS | LIBXML_COMPACT | LIBXML_NOWARNING | LIBXML_NOERROR);
