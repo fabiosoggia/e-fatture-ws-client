@@ -146,7 +146,7 @@ class Client
             'headers' => [
                 'X-Api-Uuid' => $apiUuid,
                 'X-Api-Secret' => $this->privateKey,
-                'Content-Type' => 'application/json',
+                // 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ],
             'form_params' => $withFingerprint ? $this->buildRequestArray($jsonStringData) : $data,
@@ -404,7 +404,7 @@ class Client
     public function inoltroRichiesta(ScaricoMassivoRequest $scaricoMassivoRequest)
     {
         $payload = $scaricoMassivoRequest->toArray();
-        $response = $this->executeHttpRequest("inoltroRichiesta", $payload, "POST", false);
+        $response = $this->executeHttpRequest("inoltro-richiesta", $payload, "POST", false);
         return $response;
     }
 
@@ -413,7 +413,7 @@ class Client
         $payload = [
             'IdRichiesta' => $idRichiesta,
         ];
-        $response = $this->executeHttpRequest("esitoRichiesta", $payload, "GET", false);
+        $response = $this->executeHttpRequest("esito-richiesta", $payload, "GET", false);
         return $response;
     }
 
@@ -423,7 +423,7 @@ class Client
             'IdRichiesta' => $idRichiesta,
             'IdFile' => $idFile,
         ];
-        $response = $this->executeHttpRequest("scaricoFile", $payload, "GET", false);
+        $response = $this->executeHttpRequest("scarico-file", $payload, "GET", false);
         return $response;
     }
 
