@@ -13,6 +13,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use GuzzleHttp\Exception\RequestException;
 use League\ISO3166\ISO3166;
 use CloudFinance\EFattureWsClient\V1\Enum\WebhookMessages;
+use CloudFinance\EFattureWsClient\V1\Requests\ScaricoMassivoRequest;
 
 class Client
 {
@@ -119,7 +120,7 @@ class Client
         ];
     }
 
-    public function executeHttpRequest($command, $data, $method = "POST")
+    public function executeHttpRequest($command, $data, $method = "POST", $withFingerprint = true)
     {
         if (!is_string($command)) {
             $givenType = (\is_object($command)) ? get_class($command) : gettype($command);
@@ -135,14 +136,20 @@ class Client
         }
 
         if (!is_string($data)) {
-            $data = json_encode($data);
+            $jsonStringData = json_encode($data);
         }
 
         $method = \strtoupper($method);
         $command = \strtolower($command);
         $apiUuid = $this->uuid;
         $options = [
-            'form_params' => $this->buildRequestArray($data),
+            'headers' => [
+                'X-Api-Uuid' => $apiUuid,
+                'X-Api-Secret' => $this->privateKey,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'form_params' => $withFingerprint ? $this->buildRequestArray($jsonStringData) : $data,
             'allow_redirects' => [
                 'strict' => true
             ]
@@ -391,6 +398,32 @@ class Client
         ];
 
         $response = $this->executeHttpRequest("users", $payload);
+        return $response;
+    }
+
+    public function inoltroRichiesta(ScaricoMassivoRequest $scaricoMassivoRequest)
+    {
+        $payload = $scaricoMassivoRequest->toArray();
+        $response = $this->executeHttpRequest("inoltroRichiesta", $payload, "POST", false);
+        return $response;
+    }
+
+    public function esitoRichiesta(string $idRichiesta)
+    {
+        $payload = [
+            'IdRichiesta' => $idRichiesta,
+        ];
+        $response = $this->executeHttpRequest("esitoRichiesta", $payload, "GET", false);
+        return $response;
+    }
+
+    public function scaricoFile(string $idRichiesta, string $idFile)
+    {
+        $payload = [
+            'IdRichiesta' => $idRichiesta,
+            'IdFile' => $idFile,
+        ];
+        $response = $this->executeHttpRequest("scaricoFile", $payload, "GET", false);
         return $response;
     }
 
