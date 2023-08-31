@@ -29,6 +29,11 @@ class WebhookMessages {
      */
     const WEBHOOK_RICEVI_NOTIFICA = "webhook_ricevi_notifica";
 
+    /**
+     * Cambio stato scarico massivo.
+     */
+    const WEBHOOK_SCARICO_MASSIVO = "webhook_scarico_massivo";
+
     private static function deepConvertToArray(&$params)
     {
         $params = (array) $params;
