@@ -13,7 +13,7 @@ use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
 use GuzzleHttp\Exception\RequestException;
 use League\ISO3166\ISO3166;
 use CloudFinance\EFattureWsClient\V1\Enum\WebhookMessages;
-use CloudFinance\EFattureWsClient\V1\Requests\ScaricoMassivoRequest;
+use CloudFinance\EFattureWsClient\V1\Requests\InoltroRichiestaRequest;
 
 class Client
 {
@@ -401,9 +401,9 @@ class Client
         return $response;
     }
 
-    public function inoltroRichiesta(ScaricoMassivoRequest $scaricoMassivoRequest)
+    public function inoltroRichiesta(InoltroRichiestaRequest $request)
     {
-        $payload = $scaricoMassivoRequest->toArray();
+        $payload = $request->toArray();
         $response = $this->executeHttpRequest("inoltro-richiesta", $payload, "POST", false);
         return $response;
     }

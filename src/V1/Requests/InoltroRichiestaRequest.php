@@ -5,7 +5,7 @@ namespace CloudFinance\EFattureWsClient\V1\Requests;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use DateTime;
 
-class ScaricoMassivoRequest
+class InoltroRichiestaRequest
 {
     private $elencoPiva;
     private $nomeFile;
@@ -29,7 +29,7 @@ class ScaricoMassivoRequest
     }
 
     /**
-     * @return ScaricoMassivoRequest
+     * @return InoltroRichiestaRequest
      */
     public static function make()
     {
