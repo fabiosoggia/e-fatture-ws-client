@@ -5,7 +5,7 @@ namespace CloudFinance\EFattureWsClient\V1\Requests;
 use CloudFinance\EFattureWsClient\V1\Xml\XmlWrapper;
 use DateTime;
 
-class ScaricoMassivoRequest extends XmlWrapper
+class ScaricoMassivoRequest
 {
     private $elencoPiva;
     private $nomeFile;
@@ -99,7 +99,7 @@ class ScaricoMassivoRequest extends XmlWrapper
         return $this;
     }
 
-    function toArray()
+    public function toArray()
     {
         $array = [
             'NomeFile' => $this->nomeFile,
@@ -109,24 +109,24 @@ class ScaricoMassivoRequest extends XmlWrapper
             'TipoRicerca' => $this->tipoRicerca,
             'FattureEmesse' => [
                 'DataEmissione' => [
-                    'Da' => $this->fattureEmesseDa->format('Y-m-d'),
-                    'A' => $this->fattureEmesseA->format('Y-m-d'),
+                    'Da' => empty($this->fattureEmesseDa) ? null : $this->fattureEmesseDa->format('Y-m-d'),
+                    'A' => empty($this->fattureEmesseA) ? null : $this->fattureEmesseA->format('Y-m-d'),
                 ],
             ],
             'FattureFEDisposizione' => [
                 'DataEmissione' => [
-                    'Da' => $this->fattureFEDisposizioneDa->format('Y-m-d'),
-                    'A' => $this->fattureFEDisposizioneA->format('Y-m-d'),
+                    'Da' => empty($this->fattureFEDisposizioneDa) ? null : $this->fattureFEDisposizioneDa->format('Y-m-d'),
+                    'A' => empty($this->fattureFEDisposizioneA) ? null : $this->fattureFEDisposizioneA->format('Y-m-d'),
                 ],
             ],
             'FattureRicevute' => [
                 'DataEmissione' => [
-                    'Da' => $this->fattureRicevuteDataEmissioneDa->format('Y-m-d'),
-                    'A' => $this->fattureRicevuteDataEmissioneA->format('Y-m-d'),
+                    'Da' => empty($this->fattureRicevuteDataEmissioneDa) ? null : $this->fattureRicevuteDataEmissioneDa->format('Y-m-d'),
+                    'A' => empty($this->fattureRicevuteDataEmissioneA) ? null : $this->fattureRicevuteDataEmissioneA->format('Y-m-d'),
                 ],
                 'DataRicezione' => [
-                    'Da' => $this->fattureRicevuteDataRicezioneDa->format('Y-m-d'),
-                    'A' => $this->fattureRicevuteDataRicezioneA->format('Y-m-d'),
+                    'Da' => empty($this->fattureRicevuteDataRicezioneDa) ? null : $this->fattureRicevuteDataRicezioneDa->format('Y-m-d'),
+                    'A' => empty($this->fattureRicevuteDataRicezioneA) ? null : $this->fattureRicevuteDataRicezioneA->format('Y-m-d'),
                 ],
             ],
             'Flusso' => $this->flusso,
