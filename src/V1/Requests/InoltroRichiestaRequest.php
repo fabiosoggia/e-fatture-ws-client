@@ -112,6 +112,7 @@ class InoltroRichiestaRequest
                     'Da' => empty($this->fattureEmesseDa) ? null : $this->fattureEmesseDa->format('Y-m-d'),
                     'A' => empty($this->fattureEmesseA) ? null : $this->fattureEmesseA->format('Y-m-d'),
                 ],
+                'Flusso' => $this->flusso,
             ],
             'FattureFEDisposizione' => [
                 'DataEmissione' => [
@@ -128,6 +129,7 @@ class InoltroRichiestaRequest
                     'Da' => empty($this->fattureRicevuteDataRicezioneDa) ? null : $this->fattureRicevuteDataRicezioneDa->format('Y-m-d'),
                     'A' => empty($this->fattureRicevuteDataRicezioneA) ? null : $this->fattureRicevuteDataRicezioneA->format('Y-m-d'),
                 ],
+                'Flusso' => $this->flusso,
             ],
             'Flusso' => $this->flusso,
         ];
