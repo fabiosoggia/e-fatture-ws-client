@@ -24,6 +24,8 @@ class InoltroRichiestaRequest
     private $fattureRicevuteDataRicezioneDa;
     private $fattureRicevuteDataRicezioneA;
 
+    private $extra = [];
+
     private function __construct()
     {
     }
@@ -68,6 +70,12 @@ class InoltroRichiestaRequest
     public function setFlusso(string $flusso)
     {
         $this->flusso = $flusso;
+        return $this;
+    }
+
+    public function setExtra(array $extra)
+    {
+        $this->extra = $extra;
         return $this;
     }
 
@@ -137,6 +145,7 @@ class InoltroRichiestaRequest
         ];
 
         $array = $this->removeEmptyBranchFromArray($array);
+        $array['Extra'] = $this->extra;
 
         return $array;
     }
