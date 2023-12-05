@@ -409,10 +409,11 @@ class Client
         return $response;
     }
 
-    public function esitoRichiesta(string $idRichiesta)
+    public function esitoRichiesta(string $idRichiesta, bool $withLive = false)
     {
         $payload = [
             'IdRichiesta' => $idRichiesta,
+            'withLive' => $withLive ? 'true' : 'false',
         ];
         $response = $this->executeHttpRequest("esito-richiesta", $payload, "GET", false);
         return $response;
