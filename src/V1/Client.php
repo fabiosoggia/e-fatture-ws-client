@@ -88,9 +88,10 @@ class Client
         $data['sdiInvoiceFileId'] = intval($efPayload["sdiInvoiceFileId"]);
         $data['sdiNotificationFileId'] = intval($efPayload["sdiNotificationFileId"]);
 
-        if ($data["sdiInvoiceFileId"] <= 0) {
-            throw new EFattureWsClientException("Invalid payload received.");
-        }
+        // Lo scarico massivo non ha un 'sdiInvoiceFileId' associato.
+        // if ($data["sdiInvoiceFileId"] <= 0) {
+        //     throw new EFattureWsClientException("Invalid payload received.");
+        // }
 
         $data['content'] = $efPayload["content"];
         $data['content'] = WebhookMessages::unserializeMessage($data["content"]);
