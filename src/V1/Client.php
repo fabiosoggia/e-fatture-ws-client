@@ -404,7 +404,13 @@ class Client
 
     public function inoltroRichiesta(InoltroRichiestaRequest $request)
     {
-        $payload = $request->toArray();
+        $payload = [
+            'InoltroRichiestaClass' => get_class($request),
+            'NomeFile' => $request->getNomeFile(),
+            'Xml' => $request->getXml(),
+            'Piva' => $request->getPiva(),
+            'Extra' => $request->getExtra(),
+        ];
         $response = $this->executeHttpRequest("inoltro-richiesta", $payload, "POST", false);
         return $response;
     }
