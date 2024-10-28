@@ -149,14 +149,21 @@ class FattureInoltroRichiestaRequest implements InoltroRichiestaRequest
 
     private function removeEmptyBranchFromArray($array)
     {
-        $array = array_filter($array, function ($value) {
+        foreach ($array as $key => &$value) {
+            // Se l'elemento è un array, applica la funzione ricorsivamente
             if (is_array($value)) {
                 $value = $this->removeEmptyBranchFromArray($value);
-                return !empty($value);
-            }
-            return !empty($value);
-        });
 
+                // Se il sotto-array risultante è vuoto, rimuovilo
+                if (empty($value)) {
+                    unset($array[$key]);
+                }
+            } elseif ($value === '' || $value === null) {
+                // Rimuovi gli elementi vuoti (stringa vuota o null)
+                unset($array[$key]);
+            }
+        }
+        // Ripristina gli indici e restituisce l'array senza elementi vuoti
         return $array;
     }
 
