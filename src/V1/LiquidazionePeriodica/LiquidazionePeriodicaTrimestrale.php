@@ -58,7 +58,7 @@ class LiquidazionePeriodicaTrimestrale extends XmlWrapper
 
     public function getErrors()
     {
-        $this->addValidator(new SchemaValidator(__DIR__ . "/../../../resources/Schema_VFSM10.xsd"));
+        $this->addValidator(new SchemaValidator(__DIR__ . "/../../../resources/Specifiche IVP2018_SchemaIV18/comunicazioneIvp_2018_v1.xsd"));
         return parent::getErrors();
     }
 
