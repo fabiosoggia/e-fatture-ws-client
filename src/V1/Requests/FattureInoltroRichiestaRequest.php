@@ -23,6 +23,12 @@ class FattureInoltroRichiestaRequest implements InoltroRichiestaRequest
     private $fattureRicevuteDataRicezioneDa;
     private $fattureRicevuteDataRicezioneA;
 
+    private $fattureDataAccoglienzaRicavoDa;
+    private $fattureDataAccoglienzaRicavoA;
+
+    private $fattureDataAccoglienzaCostoDa;
+    private $fattureDataAccoglienzaCostoA;
+
     private $extra = [];
 
     private function __construct()
@@ -105,6 +111,20 @@ class FattureInoltroRichiestaRequest implements InoltroRichiestaRequest
         return $this;
     }
 
+    public function ricercaFattureDataAccoglienzaRicavo(DateTime $da, DateTime $a)
+    {
+        $this->fattureDataAccoglienzaRicavoDa = $da;
+        $this->fattureDataAccoglienzaRicavoA = $a;
+        return $this;
+    }
+
+    public function ricercaFattureDataAccoglienzaCosto(DateTime $da, DateTime $a)
+    {
+        $this->fattureDataAccoglienzaCostoDa = $da;
+        $this->fattureDataAccoglienzaCostoA = $a;
+        return $this;
+    }
+
     private function toArray()
     {
         $array = [
@@ -138,6 +158,20 @@ class FattureInoltroRichiestaRequest implements InoltroRichiestaRequest
                 'Flusso' => empty($this->fattureRicevuteDataEmissioneDa)
                     && empty($this->fattureRicevuteDataRicezioneDa)
                     ? null : $this->flusso,
+            ],
+            'FattureDataAccoglienzaRicavo' => [
+                'DataAccoglienza' => [
+                    'Da' => empty($this->fattureDataAccoglienzaRicavoDa) ? null : $this->fattureDataAccoglienzaRicavoDa->format('Y-m-d'),
+                    'A' => empty($this->fattureDataAccoglienzaRicavoA) ? null : $this->fattureDataAccoglienzaRicavoA->format('Y-m-d'),
+                ],
+                'Flusso' => empty($this->fattureDataAccoglienzaRicavoDa) ? null : $this->flusso,
+            ],
+            'FattureDataAccoglienzaCosto' => [
+                'DataAccoglienza' => [
+                    'Da' => empty($this->fattureDataAccoglienzaCostoDa) ? null : $this->fattureDataAccoglienzaCostoDa->format('Y-m-d'),
+                    'A' => empty($this->fattureDataAccoglienzaCostoA) ? null : $this->fattureDataAccoglienzaCostoA->format('Y-m-d'),
+                ],
+                'Flusso' => empty($this->fattureDataAccoglienzaCostoDa) ? null : $this->flusso,
             ],
             'Flusso' => $this->flusso,
         ];
@@ -262,6 +296,38 @@ class FattureInoltroRichiestaRequest implements InoltroRichiestaRequest
             ];
         }
         $fattureRicevute = $requestArray['FattureRicevute'] ?? null;
+        $fattureDataAccoglienzaRicavo = $requestArray['FattureDataAccoglienzaRicavo'] ?? null;
+        if (is_array($fattureDataAccoglienzaRicavo)) {
+            $xmlArray['ns1:TipoRichiesta']['ns1:Fatture']['ns1:FattureDataAcc'] = [
+                'ns1:DataAccoglienza' => [
+                    'ns1:Da' => $fattureDataAccoglienzaRicavo['DataAccoglienza']['Da'],
+                    'ns1:A' => $fattureDataAccoglienzaRicavo['DataAccoglienza']['A'],
+                ],
+                'ns1:Flusso' => [
+                    'ns1:Tutte' => $fattureDataAccoglienzaRicavo['Flusso'],
+                ],
+                'ns1:Ruolo' => [
+                    'ns1:Cedente' => 'CEDENTE',
+                ],
+            ];
+        }
+
+        $fattureDataAccoglienzaCosto = $requestArray['FattureDataAccoglienzaCosto'] ?? null;
+        if (is_array($fattureDataAccoglienzaCosto)) {
+            $xmlArray['ns1:TipoRichiesta']['ns1:Fatture']['ns1:FattureDataAcc'] = [
+                'ns1:DataAccoglienza' => [
+                    'ns1:Da' => $fattureDataAccoglienzaCosto['DataAccoglienza']['Da'],
+                    'ns1:A' => $fattureDataAccoglienzaCosto['DataAccoglienza']['A'],
+                ],
+                'ns1:Flusso' => [
+                    'ns1:Tutte' => $fattureDataAccoglienzaCosto['Flusso'],
+                ],
+                'ns1:Ruolo' => [
+                    'ns1:Cessionario' => 'CESSIONARIO',
+                ],
+            ];
+        }
+
         if (is_array($fattureRicevute)) {
             // i campi ns1:DataEmissione e ns1:DataRicezione sono mutualmente esclusivi
             $xmlArray['ns1:TipoRichiesta']['ns1:Fatture']['ns1:FattureRicevute'] = [];
