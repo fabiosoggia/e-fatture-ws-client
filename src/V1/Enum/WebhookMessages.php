@@ -34,6 +34,28 @@ class WebhookMessages {
      */
     const WEBHOOK_SCARICO_MASSIVO = "webhook_scarico_massivo";
 
+    /**
+     * Firma della comunicazione liquidazione periodica IVA fallita.
+     */
+    const WEBHOOK_FIRMA_LIPE = "webhook_firma_lipe";
+
+    /**
+     * Comunicazione liquidazione periodica IVA trasmessa al Sistema Ricevente.
+     */
+    const WEBHOOK_INVIO_LIPE = "webhook_invio_lipe";
+
+    /**
+     * Ricevuto l'esito dell'elaborazione della comunicazione liquidazione
+     * periodica IVA (ES01 validato, ES02 validato con segnalazione).
+     */
+    const WEBHOOK_ESITO_LIPE = "webhook_esito_lipe";
+
+    /**
+     * La comunicazione liquidazione periodica IVA e' stata scartata dal
+     * Sistema Ricevente (ES03).
+     */
+    const WEBHOOK_SCARTO_LIPE = "webhook_scarto_lipe";
+
     private static function deepConvertToArray(&$params)
     {
         $params = (array) $params;

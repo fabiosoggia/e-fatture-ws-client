@@ -3,7 +3,10 @@
 namespace CloudFinance\EFattureWsClient\Tests;
 
 use PHPUnit\Framework\TestCase;
+use CloudFinance\EFattureWsClient\Exceptions\EFattureWsClientException;
+use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
 use CloudFinance\EFattureWsClient\V1\LiquidazionePeriodica\LiquidazionePeriodicaTrimestrale;
+use CloudFinance\EFattureWsClient\V1\LiquidazionePeriodica\XmlWrapperValidators\IVP18CommonValidator;
 
 class LiquidazionePeriodicaTrimestraleTest extends TestCase
 {
@@ -133,5 +136,140 @@ class LiquidazionePeriodicaTrimestraleTest extends TestCase
 
         $this->assertEquals('IT01589730629_LI_12345', $builder->generateFileName("_12345"));
 
+    }
+
+    /**
+     * Fornitura minima conforme allo schema: la comunicazione richiede
+     * l'attributo 'identificativo' e i campi obbligatori del frontespizio.
+     */
+    private function validXml($identificativo = '00001')
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?>
+        <Fornitura xmlns="urn:www.agenziaentrate.gov.it:specificheTecniche:sco:ivp" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+            <Intestazione>
+                <CodiceFornitura>IVP18</CodiceFornitura>
+                <CodiceFiscaleDichiarante>TRNMRT75D01A783V</CodiceFiscaleDichiarante>
+                <CodiceCarica>1</CodiceCarica>
+            </Intestazione>
+            <Comunicazione identificativo="' . $identificativo . '">
+                <Frontespizio>
+                    <CodiceFiscale>04143312345</CodiceFiscale>
+                    <AnnoImposta>2022</AnnoImposta>
+                    <PartitaIVA>04143312345</PartitaIVA>
+                    <FirmaDichiarazione>1</FirmaDichiarazione>
+                </Frontespizio>
+                <DatiContabili>
+                    <Modulo>
+                        <NumeroModulo>1</NumeroModulo>
+                        <Trimestre>1</Trimestre>
+                        <TotaleOperazioniAttive>18066,49</TotaleOperazioniAttive>
+                    </Modulo>
+                </DatiContabili>
+            </Comunicazione>
+        </Fornitura>';
+    }
+
+    public function testValidazioneFornituraValida()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml());
+        $this->assertEquals([], $builder->getErrors(), "Una fornitura valida non deve produrre errori.");
+    }
+
+    public function testValidazioneIdentificativoMancante()
+    {
+        $xml = str_replace(' identificativo="00001"', '', $this->validXml());
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+        $errors = $builder->getErrors();
+
+        $this->assertArrayHasKey(ErrorCodes::IVP18_00002, $errors);
+        $this->assertContains("identificativo", $errors[ErrorCodes::IVP18_00002]);
+    }
+
+    public function testValidazioneCodiceFornituraErrato()
+    {
+        $xml = str_replace('<CodiceFornitura>IVP18</CodiceFornitura>', '<CodiceFornitura>XXXXX</CodiceFornitura>', $this->validXml());
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+        $errors = $builder->getErrors();
+
+        $this->assertArrayHasKey(ErrorCodes::IVP18_00002, $errors);
+    }
+
+    /**
+     * Il valore 2 di EventiEccezionali esiste solo nella versione aggiornata
+     * dello schema: nella versione dello zip 2018 la fornitura verrebbe
+     * scartata.
+     */
+    public function testValidazioneEventiEccezionaliValore2()
+    {
+        $xml = str_replace(
+            '<Trimestre>1</Trimestre>',
+            '<Trimestre>1</Trimestre><EventiEccezionali>2</EventiEccezionali>',
+            $this->validXml());
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+
+        $this->assertEquals([], $builder->getErrors());
+    }
+
+    public function testValidazioneDimensioneMassima()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml());
+
+        // Un campo alfanumerico piu' grande del limite di 5 MB del canale.
+        $filler = str_repeat("A", IVP18CommonValidator::MAX_FILE_SIZE);
+        $builder->set('/Comunicazione/Frontespizio/IdentificativoProdSoftware', $filler);
+
+        $errors = $builder->getErrors();
+        $this->assertArrayHasKey(ErrorCodes::IVP18_00003, $errors);
+
+        // Il controllo di dimensione precede quello di schema.
+        $this->assertArrayNotHasKey(ErrorCodes::IVP18_00002, $errors);
+    }
+
+    /**
+     * getErrors() puo' essere chiamato piu' volte: il validatore va registrato
+     * una volta sola nel costruttore, non ad ogni chiamata.
+     */
+    public function testGetErrorsIdempotente()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml());
+
+        $this->assertEquals($builder->getErrors(), $builder->getErrors());
+    }
+
+    public function testGetters()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml('00042'));
+
+        $this->assertEquals('IVP18', $builder->getCodiceFornitura());
+        $this->assertEquals('04143312345', $builder->getCodiceFiscale());
+        $this->assertEquals('04143312345', $builder->getPartitaIva());
+        $this->assertEquals('TRNMRT75D01A783V', $builder->getCodiceFiscaleDichiarante());
+        $this->assertEquals('2022', $builder->getAnnoImposta());
+        $this->assertEquals('00042', $builder->getIdentificativo());
+        $this->assertEquals(1, $builder->countModuli());
+    }
+
+    public function testSetIdentificativo()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml());
+        $builder->setIdentificativo('00007');
+
+        $this->assertEquals('00007', $builder->getIdentificativo());
+        $this->assertEquals([], $builder->getErrors());
+    }
+
+    public function testGenerateFileNameConTrasmittenteEsplicito()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($this->validXml());
+
+        $this->assertEquals('IT01589730629_LI_00001', $builder->generateFileName('_00001', '01589730629'));
+    }
+
+    public function testGenerateFileNameSenzaCodiceFiscale()
+    {
+        $builder = LiquidazionePeriodicaTrimestrale::create();
+
+        $this->expectException(EFattureWsClientException::class);
+        $builder->generateFileName('_00001');
     }
 }

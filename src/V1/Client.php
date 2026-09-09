@@ -10,6 +10,7 @@ use CloudFinance\EFattureWsClient\V1\Enum\ErrorCodes;
 use CloudFinance\EFattureWsClient\V1\Invoice\InvoiceData;
 use CloudFinance\EFattureWsClient\V1\Invoice\NotificaEsito;
 use CloudFinance\EFattureWsClient\V1\Invoice\SignedInvoiceReader;
+use CloudFinance\EFattureWsClient\V1\LiquidazionePeriodica\LiquidazionePeriodicaTrimestrale;
 use GuzzleHttp\Exception\RequestException;
 use League\ISO3166\ISO3166;
 use CloudFinance\EFattureWsClient\V1\Enum\WebhookMessages;
@@ -87,6 +88,11 @@ class Client
         $data['sdiNotification'] = $efPayload["sdiNotification"];
         $data['sdiInvoiceFileId'] = intval($efPayload["sdiInvoiceFileId"]);
         $data['sdiNotificationFileId'] = intval($efPayload["sdiNotificationFileId"]);
+        // Chiave introdotta con la trasmissione delle LIPE: i server piu'
+        // vecchi non la inviano.
+        $data['sdiLiquidazionePeriodicaId'] = isset($efPayload["sdiLiquidazionePeriodicaId"])
+            ? intval($efPayload["sdiLiquidazionePeriodicaId"])
+            : 0;
 
         // Lo scarico massivo non ha un 'sdiInvoiceFileId' associato.
         // if ($data["sdiInvoiceFileId"] <= 0) {
@@ -289,6 +295,68 @@ class Client
         ];
         $response = $this->executeHttpRequest("invoices", $payload);
         return $response;
+    }
+
+    /**
+     * Invia una comunicazione liquidazione periodica IVA (LIPE) non firmata.
+     *
+     * Il file viene firmato in CAdES lato server e trasmesso al Sistema
+     * Ricevente dell'Agenzia delle Entrate con l'operazione 'Trasmetti'.
+     * L'esito dell'elaborazione non è immediato: arriva più tardi sui webhook
+     * WEBHOOK_ESITO_LIPE / WEBHOOK_SCARTO_LIPE.
+     *
+     * La firma non e' opzionale: il Sistema Ricevente accetta solo file
+     * firmati, quindi la comunicazione viene sempre firmata dal servizio.
+     *
+     * @throws CloudFinance\EFattureWsClient\Exceptions\ApiExceptionInterface
+     * @param LiquidazionePeriodicaTrimestrale $lipe
+     * @param string $username credenziali di firma; se vuote si usa il
+     *      firmatario di sistema
+     * @param string $password
+     * @return array
+     */
+    public function sendLiquidazionePeriodica(LiquidazionePeriodicaTrimestrale $lipe, $username = "", $password = "")
+    {
+        // Lo schema richiede l'attributo 'identificativo' sulla comunicazione:
+        // se il chiamante non l'ha valorizzato, mettine uno di default.
+        if (empty($lipe->getIdentificativo())) {
+            $lipe->setIdentificativo("00001");
+        }
+
+        $lipe->normalize();
+        $lipe->validate();
+
+        $payload = [
+            "lipeXml" => $lipe->saveXML(),
+            "sign" => true,
+            "username" => $username,
+            "password" => $password,
+        ];
+        $response = $this->executeHttpRequest("liquidazioni-periodiche", $payload);
+        return $response;
+    }
+
+    /**
+     * Elenco delle comunicazioni liquidazione periodica IVA trasmesse per un
+     * codice fiscale.
+     *
+     * @param string $codiceFiscale
+     * @return \CloudFinance\EFattureWsClient\V1\RequestBuilder
+     */
+    public function liquidazioniPeriodiche($codiceFiscale)
+    {
+        if (!is_string($codiceFiscale)) {
+            $givenType = (\is_object($codiceFiscale)) ? get_class($codiceFiscale) : gettype($codiceFiscale);
+            $message = "Argument %d passed to %s() must be of the type %s, %s given";
+            $message = sprintf($message, 1, __METHOD__, "string", $givenType);
+            throw new \InvalidArgumentException($message);
+        }
+
+        $payload = [
+            "codice_fiscale" => $codiceFiscale . "",
+        ];
+
+        return new RequestBuilder($this, "liquidazioni-periodiche", $payload, "GET");
     }
 
     /**

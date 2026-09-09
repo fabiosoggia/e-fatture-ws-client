@@ -5,7 +5,7 @@
 		<xs:documentation xml:lang="it"><![CDATA[
 		Versione 1.0 - 13/02/16]]></xs:documentation>
 	</xs:annotation>
-	<xs:import namespace="urn:www.agenziaentrate.gov.it:specificheTecniche:common" schemaLocation="../../common/fornitura_v3.xsd"/>
+	<xs:import namespace="urn:www.agenziaentrate.gov.it:specificheTecniche:common" schemaLocation="fornitura_v3.xsd"/>
 	<xs:element name="Comunicazione" type="iv:Comunicazione_IVP_Type"/>
 	<xs:complexType name="Comunicazione_IVP_Type">
 		<xs:complexContent>
@@ -163,6 +163,7 @@
 	<xs:simpleType name="Eventi_Ecc_Type">
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="1"/>
+			<xs:enumeration value="2"/>
 			<xs:enumeration value="9"/>
 		</xs:restriction>
 	</xs:simpleType>

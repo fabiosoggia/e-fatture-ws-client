@@ -251,6 +251,67 @@ class ErrorCodes {
     const FPR12_00474_MSG = "per il valore indicato nell’elemento 2.1.1.1 <TipoDocumento> non sono ammesse linee di dettaglio con l’elemento 2.2.1.12 <AliquotaIVA> contenente valore zero";
 
     // ---------------------------------------------------------------------- //
+    //          Errori di trasmissione della liquidazione periodica IVA       //
+    // ---------------------------------------------------------------------- //
+
+    const IVP18_0000A = "IVP18_0000A";
+    const IVP18_0000A_MSG = "Permessi non validi per l'operazione";
+
+    const IVP18_00001 = "IVP18_00001";
+    const IVP18_00001_MSG = "Nome file non valido";
+
+    const IVP18_00002 = "IVP18_00002";
+    const IVP18_00002_MSG = "XML non conforme allo schema della comunicazione IVP18";
+
+    const IVP18_00003 = "IVP18_00003";
+    const IVP18_00003_MSG = "Le dimensioni del file superano quelle ammesse";
+
+    const IVP18_00004 = "IVP18_00004";
+    const IVP18_00004_MSG = "Codice fornitura non valido: atteso 'IVP18'";
+
+    const IVP18_00005 = "IVP18_00005";
+    const IVP18_00005_MSG = "Campo 'Comunicazione/Frontespizio/CodiceFiscale' mancante";
+
+    const IVP18_00006 = "IVP18_00006";
+    const IVP18_00006_MSG = "Comunicazione gia' trasmessa";
+
+    // Errori restituiti dal Sistema Ricevente in risposta a 'Trasmetti'
+    // (TrasmissioneFileTypes_v2.0.xsd, ErroreInvio_Type)
+
+    const IVP18_EI01 = "EI01";
+    const IVP18_EI01_MSG = "File vuoto";
+
+    const IVP18_EI02 = "EI02";
+    const IVP18_EI02_MSG = "Servizio non disponibile";
+
+    const IVP18_EI03 = "EI03";
+    const IVP18_EI03_MSG = "Utente non abilitato";
+
+    const IVP18_EI04 = "EI04";
+    const IVP18_EI04_MSG = "File non corretto";
+
+    // Stato dell'elaborazione restituito dal Sistema Ricevente in risposta a
+    // 'Esito' (TrasmissioneFileTypes_v2.0.xsd, StatoFile_Type)
+
+    const SF01 = "SF01";
+    const SF01_MSG = "In elaborazione";
+
+    const SF02 = "SF02";
+    const SF02_MSG = "Elaborato";
+
+    const SF03 = "SF03";
+    const SF03_MSG = "Errore";
+
+    // Errori restituiti dal Sistema Ricevente in risposta a 'Esito'
+    // (TrasmissioneFileTypes_v2.0.xsd, Errore_Type)
+
+    const IVP18_EE01 = "EE01";
+    const IVP18_EE01_MSG = "Servizio non disponibile";
+
+    const IVP18_EE02 = "EE02";
+    const IVP18_EE02_MSG = "Utente non abilitato";
+
+    // ---------------------------------------------------------------------- //
     //                    Errori di trasmissione notifica                     //
     // ---------------------------------------------------------------------- //
 
