@@ -247,6 +247,21 @@ class LiquidazionePeriodicaTrimestraleTest extends TestCase
         $this->assertEquals('2022', $builder->getAnnoImposta());
         $this->assertEquals('00042', $builder->getIdentificativo());
         $this->assertEquals(1, $builder->countModuli());
+
+        // Campo facoltativo, assente da validXml().
+        $this->assertNull($builder->getIdentificativoProdSoftware());
+    }
+
+    public function testGetIdentificativoProdSoftware()
+    {
+        $xml = str_replace(
+            '<FirmaDichiarazione>1</FirmaDichiarazione>',
+            '<FirmaDichiarazione>1</FirmaDichiarazione><IdentificativoProdSoftware>01035310414</IdentificativoProdSoftware>',
+            $this->validXml());
+        $builder = LiquidazionePeriodicaTrimestrale::loadXML($xml);
+
+        $this->assertEquals('01035310414', $builder->getIdentificativoProdSoftware());
+        $this->assertEquals([], $builder->getErrors());
     }
 
     public function testSetIdentificativo()

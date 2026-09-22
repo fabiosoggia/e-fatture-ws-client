@@ -275,6 +275,9 @@ class ErrorCodes {
     const IVP18_00006 = "IVP18_00006";
     const IVP18_00006_MSG = "Comunicazione gia' trasmessa";
 
+    const IVP18_00007 = "IVP18_00007";
+    const IVP18_00007_MSG = "Campo 'Comunicazione/Frontespizio/IdentificativoProdSoftware' troppo lungo";
+
     // Errori restituiti dal Sistema Ricevente in risposta a 'Trasmetti'
     // (TrasmissioneFileTypes_v2.0.xsd, ErroreInvio_Type)
 

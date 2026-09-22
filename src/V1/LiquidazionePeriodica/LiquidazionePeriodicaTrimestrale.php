@@ -153,6 +153,21 @@ class LiquidazionePeriodicaTrimestrale extends XmlWrapper
     }
 
     /**
+     * Identificativo del produttore del software che ha generato la
+     * comunicazione, di norma la partita IVA della software house.
+     *
+     * Campo facoltativo e senza controlli di rispondenza da parte
+     * dell'Agenzia: lo schema lo tipizza 'DatoAN_Type' (alfanumerico
+     * maiuscolo) senza vincolo di lunghezza.
+     *
+     * @return string|null
+     */
+    public function getIdentificativoProdSoftware()
+    {
+        return $this->get("/Comunicazione/Frontespizio/IdentificativoProdSoftware");
+    }
+
+    /**
      * Codice fornitura, che per la LIPE vale sempre 'IVP18'.
      *
      * @return string|null
