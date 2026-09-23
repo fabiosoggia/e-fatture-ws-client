@@ -122,9 +122,15 @@ try {
         isset($options['password']) ? $options['password'] : ""
     );
 } catch (ApiExceptionInterface $ex) {
+    print_r($ex);
     fwrite(STDERR, "Invio fallito [" . $ex->getCode() . "]: " . $ex->getMessage() . "\n");
     exit(1);
+} catch (\GuzzleHttp\Exception\RequestException $ex) {
+    print_r($ex->getResponse()->getBody() . "");
+    fwrite(STDERR, "Invio fallito: " . $ex->getMessage() . "\n");
+    exit(1);
 } catch (\Exception $ex) {
+    print_r($ex);
     fwrite(STDERR, "Invio fallito: " . $ex->getMessage() . "\n");
     exit(1);
 }
